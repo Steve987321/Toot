@@ -119,6 +119,10 @@ namespace Compiler
 
 					return true;
 				}
+				else if (source[i] == ';')
+				{
+					return true;
+				}
 			}
 		}
 		else if (std::isdigit(source[pos]))
@@ -209,6 +213,8 @@ namespace Compiler
 			while (std::isspace(c))
 			{
 				pos++;
+				if (pos >= source.size())
+					return true;
 				c = source[pos];
 			}
 

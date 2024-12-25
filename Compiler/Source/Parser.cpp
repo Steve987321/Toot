@@ -3,6 +3,7 @@
 #include <iostream>
 #include <set>
 #include <format>
+#include <stack>
 
 namespace Compiler
 {
@@ -16,9 +17,9 @@ static std::vector<std::string> errors;
 
 static size_t register_pos = 0;
 static std::set<std::string> function_sigs;
-static std::unordered_map<std::string, Register> vars;
+static std::stack<std::unordered_map<std::string, Register>> vars;
 
-static std::vector<std::pair<TVM::OP_CODE, std::vector<TVM::Register>>> parse_res;
+static std::vector<VM::Instruction> parse_res;
 
 extern Register Expression();
 
@@ -41,17 +42,37 @@ static Register CreateRegisterDst(int reg)
 // returns .value.num=-1 if id not found
 static Register* GetVarRegister(const std::string& id)
 {
-	auto pos = vars.find(id);
-	if (pos != vars.end())
-	{
+	auto pos = vars.top().find(id);
+	if (pos != vars.top().end())
 		return &pos->second;
-	}
 
 	return nullptr;
 }
 
 static void AddInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args = {})
 {
+	std::string s = op_code_names[op_code] + ' ';
+	for (const Register& arg : args)
+	{
+		switch (arg.type)
+		{
+		case TVM::RegisterType::FLOAT:
+			s += std::to_string(arg.value.flt);
+			break;
+		case TVM::RegisterType::INT:
+			s += std::to_string(arg.value.num);
+			break;
+		case TVM::RegisterType::STRING:
+			s += arg.value.str;
+			break;
+		case TVM::RegisterType::REGISTER:
+			s += 'r' + std::to_string(arg.value.num);
+			break;
+		}
+		s += ' ';
+	}
+
+	std::cout << s << std::endl;
 	parse_res.emplace_back(op_code, args);
 }
 
@@ -126,9 +147,9 @@ static Register Unary()
 		}
 		else
 		{
-			res.value.num = register_pos;
-			register_pos++;
-			AddInstruction(OP_MOVE, { res, *reg });
+			res.value.num = reg->value.num;
+			//register_pos++;
+			//AddInstruction(OP_MOVE, { res, *reg });
 
 			if (is_unary_min)
 				AddInstruction(OP_NEGATE, { res });
@@ -166,7 +187,7 @@ static Register Factor()
 		AddError("Unexpected token after: ");
 	}
 
-	Register dst{};
+	Register dst = a;
 
 	Token* next = PeekNextToken();
 	if (next && next->type == TOKEN_TYPE::MULTIPLY || token->type == TOKEN_TYPE::DIVIDE)
@@ -344,15 +365,15 @@ static void IntKeyword()
 		if (token->type == TOKEN_TYPE::IDENTIFIER)
 		{
 			// get register index 
-			auto it = vars.find(id_res.value.str);
-			if (it != vars.end())
+			auto it = vars.top().find(id_res.value.str);
+			if (it != vars.top().end())
 			{
 				dst.value = it->second.value;
 				dst.type = REGISTER;
 			}
 			else
 			{
-				AddError("Undefined identifier: ");
+				AddError("Undefined identifier: {}", token->str);
 				return;
 			}
 
@@ -410,9 +431,14 @@ Register Expression()
 		case TOKEN_TYPE::BRACKET_LEFT:
 		{
 			int reg_begin = register_pos;
-			IncrementToken();
-			Expression();
+			vars.emplace();
+			while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
+			{
+				IncrementToken();
+				Expression();
+			}
 			register_pos = reg_begin;
+			vars.pop();
 			break;
 		}
 		case TOKEN_TYPE::IDENTIFIER:
@@ -433,7 +459,7 @@ Register Expression()
 	return res;
 }
 
-bool Parse(const std::vector<Token>& tokens, std::vector<std::pair<TVM::OP_CODE, std::vector<TVM::Register>>>& op_codes_res)
+bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res)
 {
 	// recursive de$0.01
 

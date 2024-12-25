@@ -23,6 +23,11 @@
     <ClCompile Include="Source\Compiler.cpp" />
     <ClCompile Include="Source\Lexer.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TVM\TVM.vcxproj">
+      <Project>{9c23880b-082d-887c-91a8-9e7cfdb0937c}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{40CAD6B7-2C97-31C3-55B0-1F6B41DC6651}</ProjectGuid>
     <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
