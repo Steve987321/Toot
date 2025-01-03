@@ -17,7 +17,7 @@ static std::vector<std::string> errors;
 
 static size_t register_pos = 0;
 static std::set<std::string> function_sigs;
-static std::stack<std::unordered_map<std::string, Register>> vars;
+static std::stack<std::unordered_map<std::string_view, Register>> vars;
 
 static std::vector<VM::Instruction> parse_res;
 
@@ -345,7 +345,7 @@ static void IntKeyword()
 		dst_reg_loc.type = REGISTER;
 		dst_reg_loc.value.num = register_pos;
 
-		vars.emplace(id_res.value.str, dst_reg_loc);
+		vars.top().emplace(id_res.value.str, dst_reg_loc);
 
 		TVM::Register src{};
 		src.type = INT;
@@ -473,14 +473,18 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 	pos = 0;
 	token = &current_tokens[0];
 
+	// begin the global scope 
+	vars.emplace();
+
 	Expression();
+
+	vars.pop();
 
 	op_codes_res = parse_res;
 
 	for (const std::string& err : errors)
-	{
 		std::cout << err << std::endl;
-	}
+
 	return errors.empty();
 }
 
