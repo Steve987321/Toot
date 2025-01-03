@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Source\TVM.cpp" />
+    <ClCompile Include="Source\TVMByteCodes.cpp" />
+    <ClCompile Include="Source\Modules\io.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\TVM.h" />
+    <ClInclude Include="Source\TVMByteCodes.h" />
+    <ClInclude Include="Source\Modules\io.h" />
+    <ClInclude Include="Source\TVMRegister.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="NewFilter1">
+      <UniqueIdentifier>{6dbfe218-27cc-40eb-aebf-a5864d72223b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
