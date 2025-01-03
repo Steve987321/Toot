@@ -201,7 +201,7 @@ void VM::OpCall(const std::vector<Register>& args)
 	assert(args[0].type == STRING);
 	auto it = functions.find(args[0].value.str);
 	if (it != functions.end())
-		it->second();
+		it->second(*this, args);
 }
 
 void VM::OpSetRelativeRegIndex(const Register& a)
@@ -222,6 +222,7 @@ void VM::Print(VM& vm, const std::vector<Register>& args)
 		switch (arg.type)
 		{
 		case REGISTER:
+		{
 			const Register& reg = vm.registers[arg.value.num];
 			switch (reg.type)
 			{
@@ -238,6 +239,7 @@ void VM::Print(VM& vm, const std::vector<Register>& args)
 				break;
 			}
 			break;
+		}
 		case INT:
 			s += std::to_string(arg.value.num);
 			break;

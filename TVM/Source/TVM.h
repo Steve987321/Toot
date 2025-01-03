@@ -29,11 +29,11 @@ namespace TVM
 
 		std::vector<Instruction> instructions;
 
-		std::unordered_map<std::string, uint64_t> labels;
+		std::unordered_map<std::string_view, uint64_t> labels;
 		using function = std::function<void(VM& vm, const std::vector<Register>&)>;
-		std::unordered_map<std::string, function> functions
+		std::unordered_map<std::string_view, function> functions = 
 		{
-			{"print", VM::Print},
+			{"print(...)", VM::Print},
 		};
 
 		void Run();
@@ -49,6 +49,7 @@ namespace TVM
 		void OpCall(const std::vector<Register>& args);
 		void OpSetRelativeRegIndex(const Register& a);
 
+		// move to Modules/io
 		static void Print(VM& vm, const std::vector<Register>& args);
 	};
 
