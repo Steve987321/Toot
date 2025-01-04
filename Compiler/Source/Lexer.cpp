@@ -115,12 +115,16 @@ namespace Compiler
 						token.type = keywords[token.str];
 					else
 						token.type = TOKEN_TYPE::IDENTIFIER;
+
 					pos = i;
 
 					return true;
 				}
 				else if (source[i] == ';')
 				{
+					token.str = source.substr(pos, i - pos);
+					token.type = TOKEN_TYPE::IDENTIFIER;
+					pos = i - 1; // so the next token will read the semicolon 
 					return true;
 				}
 			}
