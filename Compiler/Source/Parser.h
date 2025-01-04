@@ -5,7 +5,7 @@
 #include "TVMByteCodes.h"
 #include "TVM.h"
 
-static std::unordered_map<TVM::OP_CODE, std::string> op_code_names
+inline std::unordered_map<TVM::OP_CODE, std::string> op_code_names
 {
 	{TVM::OP_CODE::OP_LABEL, "OP_LABEL"},
 	{TVM::OP_CODE::OP_MOVE, "OP_MOVE"},
@@ -25,5 +25,6 @@ static std::unordered_map<TVM::OP_CODE, std::string> op_code_names
 
 namespace Compiler
 {
+	// returns true if there is no errors
 	bool Parse(const std::vector<Token>& tokens, std::vector<TVM::VM::Instruction>& op_codes_res);
 }

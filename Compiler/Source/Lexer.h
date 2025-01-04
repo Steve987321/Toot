@@ -34,6 +34,7 @@ namespace Compiler
 		ASSIGNMENT,
 		COMPARISON,
 		IDENTIFIER,
+		FORMAT_STRING,
 	};
 
 	struct Token 

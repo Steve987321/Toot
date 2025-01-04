@@ -9,6 +9,11 @@ namespace Compiler
 {
 
 using namespace TVM;
+
+struct FunctionArgs
+{
+
+};
 	
 static size_t pos = 0;
 static Token* token = nullptr;
@@ -131,7 +136,7 @@ static Register Unary()
 			return res;
 		}
 		else
-			AddError("Expected ')' at pos: {}", pos);
+			AddError("Expected ')' at pos: %d", pos);
 	}
 	else if (token->type == TOKEN_TYPE::IDENTIFIER)
 	{
@@ -143,7 +148,7 @@ static Register Unary()
 		{
 			// check function signature
 
-			AddError("Identifier not found:");
+			AddError("Identifier not found: %s", token->str.c_str());
 		}
 		else
 		{
@@ -327,7 +332,7 @@ static void IntKeyword()
 
 	if (token->type != TOKEN_TYPE::IDENTIFIER)
 	{
-		AddError("Unexpected identifier after int at: ");
+		AddError("Unexpected identifier after int at: %d", pos);
 		return;
 	}
 
@@ -392,6 +397,11 @@ static void IntKeyword()
 
 		IncrementToken();
 
+		if (!token)
+		{
+			AddError("Expected token after int at: %d", pos);
+			return;
+		}
 		if (token->type != TOKEN_TYPE::SEMICOLON)
 		{
 			AddError("Unexpected token: %s. After int at: %d", token->str.c_str(), pos);
