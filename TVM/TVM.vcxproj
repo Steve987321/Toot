@@ -80,14 +80,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Modules.h" />
     <ClInclude Include="Source\Lib\IO.h" />
     <ClInclude Include="Source\TVM.h" />
     <ClInclude Include="Source\TVMByteCodes.h" />
     <ClInclude Include="Source\TVMRegister.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Modules.cpp" />
     <ClCompile Include="Source\Lib\IO.cpp" />
     <ClCompile Include="Source\TVM.cpp" />
     <ClCompile Include="Source\TVMByteCodes.cpp" />

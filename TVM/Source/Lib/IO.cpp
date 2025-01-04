@@ -8,60 +8,29 @@ using namespace TVM;
 
 namespace IO
 {
-	void Print(VM& vm, const std::vector<Register>& args)
+	void WriteOut(VM& vm, const std::vector<TVM::Register>& args)
 	{
-		std::stringstream ss;
-
-		for (const Register& r : args)
+		Register reg = args[0];
+		while (reg.type == REGISTER)
 		{
-			switch (r.type)
-			{
-			case STRING:
-			{
-				ss << r.value.str;
-				break;
-			}
-			case INT:
-			{
-				ss << r.value.num;
-				break;
-			}
-			case FLOAT:
-			{
-				ss << r.value.flt;
-				break;
-			}
-			case REGISTER:
-			{
-				Register* reg = &vm.registers[r.value.num];
-				while (reg->type == REGISTER)
-				{
-					reg = &vm.registers[r.value.num];
-					assert(reg && "Register not found");
-				}
-
-				switch (reg->type)
-				{
-				case INT:
-					ss << reg->value.num;
-					break;
-				case STRING:
-					ss << reg->value.str;
-					break;
-				case FLOAT:
-					ss << reg->value.flt;
-					break;
-				default:
-					assert(0 && "Invalid register type");
-					break;
-				}
-
-				break;
-			}
-			
-			}
+			reg = vm.registers[reg.value.num];
 		}
 
-		std::cout << ss.str() << std::endl;
+		switch (reg.type)
+		{
+		case FUNCTION:
+			break;
+		case STRING:
+			std::cout << reg.value.str;
+			break;
+		case FLOAT:
+			std::cout << reg.value.flt;
+			break;
+		case INT:
+			std::cout << reg.value.num;
+			break;
+		default:
+			break;
+		}
 	}
 }

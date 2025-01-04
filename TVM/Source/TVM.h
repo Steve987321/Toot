@@ -9,6 +9,7 @@
 
 #include "TVMByteCodes.h"
 #include "TVMRegister.h"
+
 #include "Lib/IO.h"
 
 namespace TVM
@@ -31,14 +32,14 @@ namespace TVM
 		std::vector<Instruction> instructions;
 
 		std::unordered_map<std::string_view, uint64_t> labels;
-		using function = std::function<void(VM& vm, const std::vector<Register>&)>;
-		// ... means vector of registers
-		// . means 1 register 
-		// int, string, explicit type requires that type 
-		std::unordered_map<std::string_view, function> functions = 
-		{
-			{"print(...)", IO::Print},
-		};
+		//using function = std::function<void(VM& vm, const std::vector<Register>&)>;
+		//// ... means vector of registers
+		//// . means 1 register 
+		//// int, string, explicit type requires that type 
+		//std::unordered_map<std::string_view, function> functions = 
+		//{
+		//	{"print(...)", IO::WriteOut},
+		//};
 
 		void Run();
 

@@ -74,6 +74,7 @@ void VM::Run()
 
 void VM::OpMove(const Register& dst, const Register& src)
 {
+	assert(dst.type == REGISTER);
 	Register& dst_reg = registers[dst.value.num];
 	dst_reg = src;
 }
