@@ -15,7 +15,7 @@ namespace TVM
 		OP_DIVIDE,
 		OP_NEGATE,
 		OP_NOT,
-		OP_CALL,
+		OP_CALL, 
 		OP_JUMP,
 		OP_JUMPIFNOTZERO,
 		OP_JUMPIFZERO,
@@ -23,15 +23,8 @@ namespace TVM
 		OP_JUMPIFLESS,
 		OP_JUMPIFNOTEQUAL,
 		OP_JUMPIFEQUAL,
-		OP_SETRELREGINDEX, 
+		//OP_SETRELREGINDEX, // for the vm to handle 
 		OP_RETURN,
 		BYTE_CODE_COUNT,
 	};
-
-	inline std::array<std::pair<OP_CODE, std::function<void()>>, OP_CODE::BYTE_CODE_COUNT> bytecodes;
-
-	void Add();
-	void Subtract();
-
-	void InitBytecodes();
 }

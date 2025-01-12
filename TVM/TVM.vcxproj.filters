@@ -4,12 +4,14 @@
     <ClCompile Include="Source\TVM.cpp" />
     <ClCompile Include="Source\TVMByteCodes.cpp" />
     <ClCompile Include="Source\Lib\IO.cpp" />
+    <ClCompile Include="Source\Lib\CPPBinding.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\TVM.h" />
     <ClInclude Include="Source\TVMByteCodes.h" />
     <ClInclude Include="Source\Lib\IO.h" />
     <ClInclude Include="Source\TVMRegister.h" />
+    <ClInclude Include="Source\Lib\CPPBinding.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="NewFilter1">

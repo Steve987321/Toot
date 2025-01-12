@@ -1,6 +1,7 @@
 #include "IO.h"
 
 #include "TVM.h"
+#include "TVMRegister.h"
 
 #include <cassert>
 
@@ -10,11 +11,9 @@ namespace IO
 {
 	void WriteOut(VM& vm, const std::vector<TVM::Register>& args)
 	{
-		Register reg = args[0];
+		TVM::Register reg = args[0];
 		while (reg.type == REGISTER)
-		{
 			reg = vm.registers[reg.value.num];
-		}
 
 		switch (reg.type)
 		{
@@ -32,5 +31,10 @@ namespace IO
 		default:
 			break;
 		}
+	}
+
+	void Register(VM& vm)
+	{
+		vm.functions["WriteOut(...)"] = WriteOut;
 	}
 }

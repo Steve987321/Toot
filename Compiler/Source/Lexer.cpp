@@ -32,6 +32,48 @@ namespace Compiler
 		return true;
 	}
 
+	static bool SkipComment()
+	{
+		// check if comment
+		if (source[pos] != '/')
+			return false;
+
+		char next = 0;
+		if (!GetNextChar(next))
+			return false;
+
+		if (next == '/')
+		{
+			// skip until next line 
+
+			while (next != '\n')
+			{
+				pos++;
+				if (!GetNextChar(next))
+					break;
+			}
+
+			do
+			{
+				pos++;
+				if (!GetNextChar(next))
+					break;
+
+			} while (std::isspace(next));
+
+			pos++;
+
+			return true;
+		}
+		else if (next == '*')
+		{
+			// skip until */
+
+		}
+
+		return false;
+	}
+
 	static void CheckFinishEqualToken(Token& token)
 	{
 		char next = 0;
@@ -120,7 +162,7 @@ namespace Compiler
 
 					return true;
 				}
-				else if (source[i] == ';')
+				else if (source[i] == ';' || source[i] == '(')
 				{
 					token.str = source.substr(pos, i - pos);
 					token.type = TOKEN_TYPE::IDENTIFIER;
@@ -133,10 +175,22 @@ namespace Compiler
 		{
 			for (size_t i = pos; i < source.size(); i++)
 			{
-				if (!std::isdigit(source[i]) && source[i] != ';')
-					break;
+				if (std::isdigit(source[i]))
+					continue;
 
-				if (std::isspace(source[i]) || source[i] == c || source[i] == ';')
+				if (std::isspace(source[i]))
+					continue;
+
+				if (source[i] != ';' || source[i] != ')')
+				{
+					token.str = source.substr(pos, i - pos);
+					pos = i - 1;
+					return true;
+				}
+
+				if ( source[i] == c 
+					|| source[i] == ';' 
+					|| source[i] == ')')
 				{
 					token.str = source.substr(pos, i - pos);
 					pos = i - 1;
@@ -214,11 +268,18 @@ namespace Compiler
 			char c = source[pos];
 
 			// skip whitespace
-			while (std::isspace(c))
+			while (std::isspace(c)) 
 			{
 				pos++;
 				if (pos >= source.size())
 					return true;
+
+				c = source[pos];
+			}
+
+			if (SkipComment())
+			{
+				// update to character after comment 
 				c = source[pos];
 			}
 

@@ -8,6 +8,11 @@
 namespace TVM
 {
 
+void VM::Init()
+{
+	IO::Register(*this);
+}
+
 void VM::Run()
 {
 	while (instruction_pointer < instructions.size())
@@ -45,10 +50,6 @@ void VM::Run()
 		//	assert(i.args.size() == 2);
 		//	OpNegate(i.args[0], i.args[1]);
 		//	break;
-		case OP_SETRELREGINDEX:
-			assert(i.args.size() == 1);
-			OpSetRelativeRegIndex(i.args[0]);
-			break;
 		case OP_NOT:
 			break;
 		case OP_CALL:
@@ -193,75 +194,34 @@ void VM::OpDivide(const Register& dst, const Register& a, const Register& b)
 
 void VM::OpLabel(const Register& a)
 {
-	assert(a.type == STRING);
 	labels[a.value.str] = instruction_pointer;
 }
 
 void VM::OpCall(const std::vector<Register>& args)
 {
-	assert(args[0].type == STRING);
+	BeginRelativeRegIndex(instruction_pointer);
+
 	auto it = functions.find(args[0].value.str);
 	if (it != functions.end())
 		it->second(*this, args);
-}
 
-void VM::OpSetRelativeRegIndex(const Register& a)
-{
-	assert(a.type == INT);
-	relative_register_index = a.value.num;
-}
-
-void VM::Print(VM& vm, const std::vector<Register>& args)
-{
-	const Register& frmt = args[0];
-	assert(frmt.type == RegisterType::STRING);	
-
-	std::string s = frmt.value.str;
-
-	for (const Register& arg : args)
-	{
-		switch (arg.type)
-		{
-		case REGISTER:
-		{
-			const Register& reg = vm.registers[arg.value.num];
-			switch (reg.type)
-			{
-			case INT:
-				s += std::to_string(arg.value.num);
-				break;
-			case STRING:
-				s += arg.value.str;
-				break;
-			case FLOAT:
-				s += std::to_string(arg.value.flt);
-				break;
-			default:
-				break;
-			}
-			break;
-		}
-		case INT:
-			s += std::to_string(arg.value.num);
-			break;
-		case STRING:
-			s += arg.value.str;
-			break;
-		case FLOAT:
-			s += std::to_string(arg.value.flt);
-			break;
-		default:
-			s += '?';
-			break;
-		}
-	}
-
-	std::cout << s << std::endl;
+	EndRelativeRegIndex();
 }
 
 void VM::OpJump(const Register& a)
 {
 	instruction_pointer = a.value.num;
+}
+
+void VM::BeginRelativeRegIndex(uint64_t rel)
+{
+	previous_reg_index = relative_register_index;
+	relative_register_index = rel;
+}
+
+void VM::EndRelativeRegIndex()
+{
+	relative_register_index = previous_reg_index;
 }
 
 }

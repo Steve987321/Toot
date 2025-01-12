@@ -16,4 +16,6 @@ namespace TVM
 namespace IO
 {
 	void WriteOut(TVM::VM& vm, const std::vector<TVM::Register>& args);
+
+	void Register(TVM::VM& vm);
 }

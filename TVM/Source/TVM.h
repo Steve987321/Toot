@@ -14,8 +14,9 @@
 
 namespace TVM
 {
-	struct VM
+	class VM
 	{
+	public:
 		Register registers[1024];
 
 		uint64_t relative_register_index = 0;
@@ -32,14 +33,12 @@ namespace TVM
 		std::vector<Instruction> instructions;
 
 		std::unordered_map<std::string_view, uint64_t> labels;
-		//using function = std::function<void(VM& vm, const std::vector<Register>&)>;
+		using function = std::function<void(VM& vm, const std::vector<Register>&)>;
 		//// ... means vector of registers
 		//// . means 1 register 
 		//// int, string, explicit type requires that type 
-		//std::unordered_map<std::string_view, function> functions = 
-		//{
-		//	{"print(...)", IO::WriteOut},
-		//};
+		std::unordered_map<std::string_view, function> functions;
+		void Init();
 
 		void Run();
 
@@ -52,10 +51,11 @@ namespace TVM
 		void OpJump(const Register& a);
 		void OpJumpIfZero(const Register& jump, const Register& a, const Register& b);
 		void OpCall(const std::vector<Register>& args);
-		void OpSetRelativeRegIndex(const Register& a);
 
-		// move to Modules/io
-		static void Print(VM& vm, const std::vector<Register>& args);
+	private:
+		uint64_t previous_reg_index = 0;
+		void BeginRelativeRegIndex(uint64_t rel);
+		void EndRelativeRegIndex();
 	};
 
 }

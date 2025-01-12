@@ -1,5 +1,6 @@
 #include "Parser.h"
 
+#include <cassert>
 #include <iostream>
 #include <set>
 #include <format>
@@ -44,7 +45,6 @@ static Register CreateRegisterDst(int reg)
 	return dst;
 }
 
-// returns .value.num=-1 if id not found
 static Register* GetVarRegister(const std::string& id)
 {
 	auto pos = vars.top().find(id);
@@ -54,7 +54,8 @@ static Register* GetVarRegister(const std::string& id)
 	return nullptr;
 }
 
-static void AddInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args = {})
+// temp
+static void PrintInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args = {})
 {
 	std::string s = op_code_names[op_code] + ' ';
 	for (const Register& arg : args)
@@ -78,6 +79,13 @@ static void AddInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args
 	}
 
 	std::cout << s << std::endl;
+}
+
+static void AddInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args = {})
+{
+	// temp
+	PrintInstruction(op_code, args);
+
 	parse_res.emplace_back(op_code, args);
 }
 
@@ -88,6 +96,34 @@ static void IncrementToken()
 		token = &current_tokens[pos];
 	else
 		token = nullptr;
+}
+
+static std::string RegToType(const Register& reg)
+{
+	switch (reg.type)
+	{
+	case REGISTER:
+		return "register";
+	case INT:
+		return "int";
+	case STRING:
+		return "string";
+	case FLOAT:
+		return "float";
+	default:
+		return "UnkownType";
+	}
+}
+
+// Checks the registers and returns the comma separated types a=1;b=2; (r0, r1) = (int, int)
+static std::string RegsToTypes(const std::vector<TVM::Register>& args)
+{
+	std::string res;
+
+	for (const Register& reg : args)
+		res += RegToType(reg);
+
+	return res;
 }
 
 static Token* PeekNextToken()
@@ -147,7 +183,6 @@ static Register Unary()
 		if (!reg)
 		{
 			// check function signature
-
 			AddError("Identifier not found: %s", token->str.c_str());
 		}
 		else
@@ -162,6 +197,7 @@ static Register Unary()
 	}
 	else if (token->type == TOKEN_TYPE::NUMBER)
 	{
+		res.type = REGISTER;
 		int val = std::stoi(token->str);
 
 		if (is_unary_min)
@@ -220,7 +256,7 @@ static Register PlusMinus()
 		AddError("Unexpected token after: ");
 	}
 
-	Register dst{};
+	Register dst = a;
 
 	Token* next = PeekNextToken();
 	if (next && next->type == TOKEN_TYPE::PLUS || token->type == TOKEN_TYPE::MINUS)
@@ -262,20 +298,35 @@ static Register Identifier()
 	if (token->type == TOKEN_TYPE::PARENTHESES_LEFT)
 	{
 		res.type = FUNCTION;
-		std::string arg_list = token->str;
+		std::vector<Register> args_as_registers{};
+		std::string arg_list;
 
 		for (int i = pos; i < current_tokens.size(); i++)
 		{
 			Token& t = current_tokens[i];
+
+			if (t.type == TOKEN_TYPE::NUMBER || t.type == TOKEN_TYPE::FLOAT)
+			{
+				// numerical
+				IncrementToken();
+				Register arg = PlusMinus();
+				assert(arg.type == REGISTER);
+				args_as_registers.emplace_back(arg);
+			}
+
 			arg_list += t.str;
 
+			Register* arg_reg = GetVarRegister(t.str);
+			if (arg_reg)
+				args_as_registers.emplace_back(*arg_reg);
+		
 			// end of args 
 			if (t.type == TOKEN_TYPE::PARENTHESES_RIGHT)
 			{
-				std::string sig = res.value.str + arg_list;
+				pos = i;
 
-				// globgogabgalab
-				//TOKEN_TYPE& next = current_tokens[i + 1].type;
+				std::string sig = res.value.str + RegsToTypes(args_as_registers);
+
 				Token* next = PeekNextToken();
 				if (!next)
 				{
@@ -302,15 +353,23 @@ static Register Identifier()
 				{
 					// call
 
-					if (!function_sigs.contains(sig))
-						AddError("No function found with");
+					//if (!function_sigs.contains(sig))
+					//{
+					//	AddError("No function found with signature %s", sig.c_str());
+					//	return res;
+					//}
 
+					// #TODO: temp
+					// cause a leak for now 
 					Register function_arg{};
 					function_arg.type = STRING;
-					function_arg.value.str = sig.c_str();
+					void* p = malloc(sig.size());
+					assert(p);
+					memcpy(p, sig.c_str(), sig.size() + 1);
+					function_arg.value.str = (char*)p;
+					args_as_registers.insert(args_as_registers.begin(), function_arg);
 
-					//AddInstruction(OP_MOVE);
-					//AddInstruction(OP_CALL, { function_arg,  });
+					AddInstruction(OP_CALL, args_as_registers);
 				}
 			}
 		}
@@ -364,7 +423,7 @@ static void IntKeyword()
 		IncrementToken();
 
 		TVM::Register dst{};
-		dst.type = INT;
+		dst.type = REGISTER;
 		dst.value.num = register_pos;
 
 		if (token->type == TOKEN_TYPE::IDENTIFIER)
@@ -471,8 +530,8 @@ Register Expression()
 
 bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res)
 {
-	// recursive de$0.01
-
+	// recursive des$0.01
+	
 	parse_res.clear();
 	errors.clear();
 	current_tokens = tokens;
