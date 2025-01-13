@@ -11,9 +11,11 @@ namespace IO
 {
 	void WriteOut(VM& vm, const std::vector<TVM::Register>& args)
 	{
-		TVM::Register reg = args[0];
+		// first arg is the function
+		TVM::Register reg = args[1];
 		while (reg.type == REGISTER)
-			reg = vm.registers[reg.value.num];
+			reg = vm.GetReg(reg.value.num);
+			//reg = vm.GetReg(reg.value.num);
 
 		switch (reg.type)
 		{
@@ -33,8 +35,23 @@ namespace IO
 		}
 	}
 
+	CPPLib GetIOLib()
+	{
+		CPPLib l;
+		l.functions.emplace_back(WriteOut, "WriteOut", "...");
+
+		TVM::Register pi{};
+		pi.type = FLOAT;
+		pi.value.flt = 3.141f;
+
+		l.vars["PI"] = pi;
+
+		return l;
+	}
+	
 	void Register(VM& vm)
 	{
-		vm.functions["WriteOut(...)"] = WriteOut;
+		CPPFunction FWriteOut{WriteOut, "WriteOut", "...", "WriteOut ..."};
+		vm.functions[FWriteOut.function_sig] = FWriteOut;
 	}
 }

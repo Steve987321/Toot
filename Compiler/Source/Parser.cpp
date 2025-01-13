@@ -34,6 +34,7 @@ static void AddError(std::string_view format, TArgs... args)
 {
 	char buf[128]{};
 	snprintf(buf, sizeof(buf), format.data(), args...);
+	std::cout << buf << std::endl;
 	errors.emplace_back(buf);
 }
 
@@ -152,7 +153,8 @@ static Register Unary()
 	if (token->type == TOKEN_TYPE::PARENTHESES_LEFT)
 	{
 		IncrementToken();
-		Register reg_res = PlusMinus();
+		res = PlusMinus();
+		IncrementToken();
 		if (token->type == TOKEN_TYPE::PARENTHESES_RIGHT)
 		{
 			if (is_unary_min || is_not)
@@ -162,11 +164,11 @@ static Register Unary()
 				register_pos++;
 
 				if (is_unary_min)
-					AddInstruction(OP_NEGATE, { reg_res });
+					AddInstruction(OP_NEGATE, { res });
 				else if (is_not)
-					AddInstruction(OP_NOT, { reg_res });
+					AddInstruction(OP_NOT, { res });
 
-				AddInstruction(OP_MOVE, { dst, reg_res });
+				AddInstruction(OP_MOVE, { dst, res });
 			}
 
 			return res;
@@ -225,23 +227,34 @@ static Register Factor()
 	Register a = Unary();
 	if (a.value.num == -1)
 	{
-		AddError("Unexpected token after: ");
+		AddError("Unexpected token after: %s", token->str.c_str());
 	}
 
 	Register dst = a;
 
 	Token* next = PeekNextToken();
-	if (next && next->type == TOKEN_TYPE::MULTIPLY || token->type == TOKEN_TYPE::DIVIDE)
+	if (next && (next->type == TOKEN_TYPE::MULTIPLY || next->type == TOKEN_TYPE::DIVIDE))
 	{
 		IncrementToken();
 
-		while (token->type == TOKEN_TYPE::MULTIPLY || token->type == TOKEN_TYPE::DIVIDE)
+		while (next && (next->type == TOKEN_TYPE::MULTIPLY || next->type == TOKEN_TYPE::DIVIDE))
 		{
 			IncrementToken();
 			Register b = Unary();
 			dst = CreateRegisterDst(register_pos);
 			register_pos++;
-			AddInstruction(OP_MULTIPLY, { dst, a, b });
+
+			if (next->type == TOKEN_TYPE::MULTIPLY)
+				AddInstruction(OP_MULTIPLY, { dst, a, b });
+			else 
+				AddInstruction(OP_DIVIDE, { dst, a, b });
+
+			next = PeekNextToken();
+			if (next && (next->type == TOKEN_TYPE::MULTIPLY || next->type == TOKEN_TYPE::DIVIDE))
+			{
+				a = dst;
+				IncrementToken();
+			}
 		}
 	}
 
@@ -253,23 +266,35 @@ static Register PlusMinus()
 	Register a = Factor();
 	if (a.value.num == -1)
 	{
-		AddError("Unexpected token after: ");
+		AddError("Unexpected token after: {}", token->str);
 	}
 
 	Register dst = a;
 
 	Token* next = PeekNextToken();
-	if (next && next->type == TOKEN_TYPE::PLUS || token->type == TOKEN_TYPE::MINUS)
+	if (next && (next->type == TOKEN_TYPE::PLUS || next->type == TOKEN_TYPE::MINUS))
 	{
 		IncrementToken();
 
-		while (token->type == TOKEN_TYPE::PLUS || token->type == TOKEN_TYPE::MINUS)
+		while (next && (next->type == TOKEN_TYPE::PLUS || next->type == TOKEN_TYPE::MINUS))
 		{
 			IncrementToken();
+			int rp_prev = register_pos;
 			Register b = Factor();
-			dst = CreateRegisterDst(register_pos);
-			register_pos++;
-			AddInstruction(OP_ADD, { dst, a, b });
+			dst = CreateRegisterDst(rp_prev);
+			register_pos = rp_prev + 1;
+
+			if (next->type == TOKEN_TYPE::PLUS)
+				AddInstruction(OP_ADD, { dst, a, b });
+			else 
+				AddInstruction(OP_SUBTRACT, { dst, a, b });
+
+			next = PeekNextToken();
+			if (next && (next->type == TOKEN_TYPE::PLUS || next->type == TOKEN_TYPE::MINUS))
+			{
+				a = dst;
+				IncrementToken();
+			}
 		}
 	}
 
@@ -294,6 +319,9 @@ static Register Identifier()
 
 	IncrementToken();
 
+	if (!token)
+		return res;
+
 	// check if function call or definition
 	if (token->type == TOKEN_TYPE::PARENTHESES_LEFT)
 	{
@@ -301,14 +329,14 @@ static Register Identifier()
 		std::vector<Register> args_as_registers{};
 		std::string arg_list;
 
-		for (int i = pos; i < current_tokens.size(); i++)
+		for (size_t i = pos; i < current_tokens.size(); i++)
 		{
 			Token& t = current_tokens[i];
 
 			if (t.type == TOKEN_TYPE::NUMBER || t.type == TOKEN_TYPE::FLOAT)
 			{
+				pos = i - 1;
 				// numerical
-				IncrementToken();
 				Register arg = PlusMinus();
 				assert(arg.type == REGISTER);
 				args_as_registers.emplace_back(arg);
@@ -325,7 +353,9 @@ static Register Identifier()
 			{
 				pos = i;
 
-				std::string sig = res.value.str + RegsToTypes(args_as_registers);
+				std::string sig = res.value.str;
+				sig += ' ';
+				sig += RegsToTypes(args_as_registers);
 
 				Token* next = PeekNextToken();
 				if (!next)
@@ -352,15 +382,16 @@ static Register Identifier()
 				else if (next->type == TOKEN_TYPE::SEMICOLON)
 				{
 					// call
+					std::string func_name = sig.substr(0, sig.find(' '));
+					if (function_sigs.contains(func_name + " ..."))
+						sig = func_name + " ...";
+					else if (!function_sigs.contains(sig))
+					{
+						AddError("No function found with signature %s", sig.c_str());
+						return res;
+					}
 
-					//if (!function_sigs.contains(sig))
-					//{
-					//	AddError("No function found with signature %s", sig.c_str());
-					//	return res;
-					//}
-
-					// #TODO: temp
-					// cause a leak for now 
+					// #TODo: temp leak for now 
 					Register function_arg{};
 					function_arg.type = STRING;
 					void* p = malloc(sig.size());
@@ -370,6 +401,7 @@ static Register Identifier()
 					args_as_registers.insert(args_as_registers.begin(), function_arg);
 
 					AddInstruction(OP_CALL, args_as_registers);
+					break;
 				}
 			}
 		}
@@ -404,13 +436,6 @@ static void IntKeyword()
 	}
 	else
 	{
-		// store location of var
-		TVM::Register dst_reg_loc{};
-		dst_reg_loc.type = REGISTER;
-		dst_reg_loc.value.num = register_pos;
-
-		vars.top().emplace(id_res.value.str, dst_reg_loc);
-
 		TVM::Register src{};
 		src.type = INT;
 
@@ -453,6 +478,8 @@ static void IntKeyword()
 			AddError("Unexpected token after assignment at: ");
 			return;
 		}
+
+		vars.top().emplace(id_res.value.str, dst);
 
 		IncrementToken();
 
@@ -544,6 +571,11 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 
 	// begin the global scope 
 	vars.emplace();
+	
+	for (CPPFunction& function : IO::GetIOLib().functions)
+	{
+		function_sigs.emplace(std::string(function.function_name) + ' ' + function.accepted_args);
+	}
 
 	Expression();
 

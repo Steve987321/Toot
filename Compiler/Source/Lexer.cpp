@@ -63,6 +63,9 @@ namespace Compiler
 
 			pos++;
 
+			if (next == '/')
+				SkipComment();
+
 			return true;
 		}
 		else if (next == '*')
@@ -130,6 +133,13 @@ namespace Compiler
 		// check if number 
 		for (char c : token.str)
 		{
+			if (std::isspace(c))
+			{
+				// just in case there is still space 
+				token.str.pop_back();
+				continue;
+			}
+
 			if (!std::isdigit(c)) 
 				return;
 
@@ -162,7 +172,7 @@ namespace Compiler
 
 					return true;
 				}
-				else if (source[i] == ';' || source[i] == '(')
+				else if (source[i] == ';' || source[i] == '(' || source[i] == ')')
 				{
 					token.str = source.substr(pos, i - pos);
 					token.type = TOKEN_TYPE::IDENTIFIER;
@@ -188,7 +198,7 @@ namespace Compiler
 					return true;
 				}
 
-				if ( source[i] == c 
+				if (source[i] == c 
 					|| source[i] == ';' 
 					|| source[i] == ')')
 				{
@@ -196,6 +206,10 @@ namespace Compiler
 					pos = i - 1;
 					return true;
 				}
+
+				token.str = source.substr(pos, i - pos);
+				pos = i - 1;
+				return true;
 			}
 		}
 

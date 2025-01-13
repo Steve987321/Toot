@@ -23,8 +23,10 @@ namespace Compiler
 
 		Parse(tokens, res);
 
+		// tEMP  
 		TVM::VM vm;
 		vm.instructions = res;
+		vm.Init();
 		vm.Run();
 
 		/*for (const auto& [op_code, args] : res)

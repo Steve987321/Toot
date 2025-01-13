@@ -10,7 +10,10 @@ namespace TVM
 
 void VM::Init()
 {
+	// #todo #include brrr
 	IO::Register(*this);
+
+	rel_reg_stack.push(0);
 }
 
 void VM::Run()
@@ -76,7 +79,7 @@ void VM::Run()
 void VM::OpMove(const Register& dst, const Register& src)
 {
 	assert(dst.type == REGISTER);
-	Register& dst_reg = registers[dst.value.num];
+	Register& dst_reg = registers[dst.value.num + relative_register_index];
 	dst_reg = src;
 }
 
@@ -87,22 +90,24 @@ void VM::OpAdd(const Register& dst, const Register& a, const Register& b)
 	if (a.type == REGISTER)
 		l = &registers[a.value.num + relative_register_index];
 	if (b.type == REGISTER)
-		r = &registers[b.value.num];
+		r = &registers[b.value.num + relative_register_index];
 
 	assert(l && r);
 
-	Register& dst_reg = registers[dst.value.num];
-	dst_reg = *l;
+	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	//*dst_reg = *l;
 
 	switch (l->type)
 	{
 	case STRING:
 		break;
 	case FLOAT:
-		dst_reg.value.flt += r->value.flt;
+		dst_reg->type = FLOAT;
+		dst_reg->value.flt = l->value.num + r->value.flt;
 		break;
 	case INT:
-		dst_reg.value.num += r->value.num;
+		dst_reg->type = INT;
+		dst_reg->value.num = l->value.num + r->value.num;
 		break;
 	default:
 		break;
@@ -120,18 +125,20 @@ void VM::OpSubtract(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register& dst_reg = registers[dst.value.num];
-	dst_reg = *l;
+	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	//*dst_reg = *l;
 
 	switch (l->type)
 	{
 	case STRING:
 		break;
 	case FLOAT:
-		dst_reg.value.flt -= r->value.flt;
+		dst_reg->type = FLOAT;
+		dst_reg->value.flt = l->value.flt - r->value.flt;
 		break;
 	case INT:
-		dst_reg.value.num -= r->value.num;
+		dst_reg->type = INT;
+		dst_reg->value.num = l->value.num - r->value.num;
 		break;
 	default:
 		break;
@@ -149,16 +156,18 @@ void VM::OpMultiply(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register& dst_reg = registers[dst.value.num];
-	dst_reg = *l;
+	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	//*dst_reg = *l;
 
 	switch (l->type)
 	{
 	case FLOAT:
-		dst_reg.value.flt *= r->value.flt;
+		dst_reg->type = FLOAT;
+		dst_reg->value.flt = l->value.flt * r->value.flt;
 		break;
 	case INT:
-		dst_reg.value.num *= r->value.num;
+		dst_reg->type = INT;
+		dst_reg->value.num = l->value.num * r->value.num;
 		break;
 	default:
 		break;
@@ -176,16 +185,18 @@ void VM::OpDivide(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register& dst_reg = registers[dst.value.num];
-	dst_reg = *l;
+	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	*dst_reg = *l;
 
 	switch (l->type)
 	{
 	case FLOAT:
-		dst_reg.value.flt /= r->value.flt;
+		dst_reg->type = FLOAT;
+		dst_reg->value.flt = l->value.flt / r->value.flt;
 		break;
 	case INT:
-		dst_reg.value.num /= r->value.num;
+		dst_reg->type = INT;
+		dst_reg->value.num = l->value.num / r->value.num;
 		break;
 	default:
 		break;
@@ -203,10 +214,24 @@ void VM::OpCall(const std::vector<Register>& args)
 
 	auto it = functions.find(args[0].value.str);
 	if (it != functions.end())
-		it->second(*this, args);
+		it->second.function(*this, args);
+	else
+		throw std::runtime_error("no function like that");
 
 	EndRelativeRegIndex();
 }
+
+Register& VM::GetReg(uint64_t index)
+{
+	assert(index + relative_register_index < registers.size() && "iNCcrease Vm Registers size");
+
+	return registers[index + relative_register_index];
+}
+
+//Register& VM::GetValueAtReg()
+//{
+//
+//}
 
 void VM::OpJump(const Register& a)
 {
@@ -215,13 +240,16 @@ void VM::OpJump(const Register& a)
 
 void VM::BeginRelativeRegIndex(uint64_t rel)
 {
-	previous_reg_index = relative_register_index;
-	relative_register_index = rel;
+	relative_register_index += rel_reg_stack.top();
+	rel_reg_stack.push(relative_register_index);
 }
 
 void VM::EndRelativeRegIndex()
 {
-	relative_register_index = previous_reg_index;
+	// #TODO: uwnind registers from previous call
+
+	relative_register_index -= rel_reg_stack.top();
+	rel_reg_stack.pop();
 }
 
 }
