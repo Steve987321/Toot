@@ -39,7 +39,7 @@ void VM::Run()
 			break;
 		case OP_SUBTRACT:
 			assert(i.args.size() == 3);
-			OpAdd(i.args[0], i.args[1], i.args[2]);
+			OpSubtract(i.args[0], i.args[1], i.args[2]);
 			break;
 		case OP_MULTIPLY:
 			assert(i.args.size() == 3);

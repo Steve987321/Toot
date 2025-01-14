@@ -333,20 +333,51 @@ static Register Identifier()
 		{
 			Token& t = current_tokens[i];
 
+			if (t.type == TOKEN_TYPE::IDENTIFIER)
+			{
+				Register* reg = GetVarRegister(t.str);
+
+				// #TODO VALIDATE FOR NUM VALUEs
+				if (reg)
+				{
+					pos = i;
+					token = &current_tokens[i];
+					// numerical
+					Register arg = PlusMinus();
+
+					// check if -1 and in that case it probably ended the expression
+					if (arg.value.num != -1)
+					{
+						assert(arg.type == REGISTER);
+						args_as_registers.emplace_back(arg);
+						i = pos;
+					}
+				}
+			}
+
 			if (t.type == TOKEN_TYPE::NUMBER || t.type == TOKEN_TYPE::FLOAT)
 			{
-				pos = i - 1;
+				pos = i;
+				token = &current_tokens[i];
 				// numerical
 				Register arg = PlusMinus();
-				assert(arg.type == REGISTER);
-				args_as_registers.emplace_back(arg);
+
+				// check if -1 and in that case it probably ended the expression
+				if (arg.value.num != -1)
+				{
+					assert(arg.type == REGISTER);
+					args_as_registers.emplace_back(arg);
+					i = pos;
+				}
 			}
 
 			arg_list += t.str;
 
-			Register* arg_reg = GetVarRegister(t.str);
-			if (arg_reg)
-				args_as_registers.emplace_back(*arg_reg);
+			//Register* arg_reg = GetVarRegister(t.str);
+			//if (arg_reg)
+			//{
+			//	args_as_registers.emplace_back(*arg_reg);
+			//}
 		
 			// end of args 
 			if (t.type == TOKEN_TYPE::PARENTHESES_RIGHT)
@@ -454,7 +485,7 @@ static void IntKeyword()
 		if (token->type == TOKEN_TYPE::IDENTIFIER)
 		{
 			// get register index 
-			auto it = vars.top().find(id_res.value.str);
+			auto it = vars.top().find(token->str);
 			if (it != vars.top().end())
 			{
 				dst.value = it->second.value;
@@ -462,7 +493,7 @@ static void IntKeyword()
 			}
 			else
 			{
-				AddError("Undefined identifier: {}", token->str);
+				AddError("Undefined identifier: %s", id_res.value.str);
 				return;
 			}
 
