@@ -23,7 +23,9 @@ namespace Compiler
 		BRACKET_LEFT,
 		BRACKET_RIGHT,
 		MINUS,
+		MINUS_AND_ASSIGN,
 		PLUS,
+		PLUS_AND_ASSIGN,
 		NOT,
 		PARENTHESES_LEFT,
 		PARENTHESES_RIGHT,
@@ -43,6 +45,8 @@ namespace Compiler
 		std::string str;
 		uint32_t line;
 	};
+
+	bool TokenIsDigit(const Token& t);
 
 	void LexerInit(std::string_view src);
 

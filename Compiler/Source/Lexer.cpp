@@ -77,7 +77,9 @@ namespace Compiler
 		return false;
 	}
 
-	static void CheckFinishEqualToken(Token& token)
+	// minor aids 
+
+	static void CheckFinishToken(Token& token, char possible_next, TOKEN_TYPE possible_type)
 	{
 		char next = 0;
 		if (!GetNextChar(next))
@@ -87,35 +89,12 @@ namespace Compiler
 		}
 
 		// only one other posibility
-		if (next == '=')
-			token.type == TOKEN_TYPE::COMPARISON;
-	}
-
-	static void CheckFinishMultiplyToken(Token& token)
-	{
-		char next = 0;
-		if (!GetNextChar(next))
+		if (next == possible_next)
 		{
-			token.type == TOKEN_TYPE::ERROR;
-			return;
+			token.type == possible_type;
+			pos++;
 		}
 
-		if (next == '=')
-			token.type == TOKEN_TYPE::MULTIPLY_AND_ASSIGN;
-		// *= ** ? !?>? PYTHONG 
-	}
-
-	static void CheckFinishDivideToken(Token& token)
-	{
-		char next = 0;
-		if (!GetNextChar(next))
-		{
-			token.type == TOKEN_TYPE::ERROR;
-			return;
-		}
-
-		if (next == '=')
-			token.type == TOKEN_TYPE::DIVIDE_AND_ASSIGN;
 	}
 
 	// check if the word is something 
@@ -240,23 +219,23 @@ namespace Compiler
 			break;
 		case '=':
 			res.type = TOKEN_TYPE::ASSIGNMENT;
-			CheckFinishEqualToken(res);
+			CheckFinishToken(res, '=', TOKEN_TYPE::COMPARISON);
 			break;
 		case '*':
 			res.type = TOKEN_TYPE::MULTIPLY;
-			CheckFinishMultiplyToken(res);
+			CheckFinishToken(res, '=', TOKEN_TYPE::MULTIPLY_AND_ASSIGN);
 			break;
 		case '+':
 			res.type = TOKEN_TYPE::PLUS;
-			//CheckFinishMultiplyToken(res);
+			CheckFinishToken(res, '=', TOKEN_TYPE::PLUS_AND_ASSIGN);
 			break;
 		case '-':
 			res.type = TOKEN_TYPE::MINUS;
-			//CheckFinishMultiplyToken(res);
+			CheckFinishToken(res, '=', TOKEN_TYPE::MINUS_AND_ASSIGN);
 			break;
 		case '/':
 			res.type = TOKEN_TYPE::DIVIDE;
-			CheckFinishDivideToken(res);
+			CheckFinishToken(res, '=', TOKEN_TYPE::DIVIDE_AND_ASSIGN);
 			break;
 		default:
 			res.type = TOKEN_TYPE::IDENTIFIER;
@@ -266,6 +245,11 @@ namespace Compiler
 		}
 
 		return res;
+	}
+
+	bool TokenIsDigit(const Token& t)
+	{
+		return t.type == TOKEN_TYPE::FLOAT || t.type == TOKEN_TYPE::INT;
 	}
 
 	void LexerInit(std::string_view src)

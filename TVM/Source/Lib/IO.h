@@ -6,20 +6,23 @@
 #include <iostream>
 #include <fstream>
 
-#include "TVMRegister.h"
 #include "CPPBinding.h"
 
-namespace TVM
-{
-	struct VM;
-}
+class VM;
+struct VMRegister;
 
 namespace IO
 {
-	void WriteOut(TVM::VM& vm, const std::vector<TVM::Register>& args);
+	// Writes to stdout
+	void WriteOut(VM& vm, const std::vector<VMRegister>& args);
 
-	// for the parser plzs 
-	TVM::CPPLib GetIOLib();
+	// testing the explicit argument types 
+	inline void Nothing(VM& vm, const std::vector<VMRegister>& args)
+	{
+	}
 
-	void Register(TVM::VM& vm);
+	// for the parser and vm 
+	CPPLib GetIOLib();
+
+	void RegisterToVM(VM& vm);
 }

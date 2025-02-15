@@ -5,17 +5,15 @@
 #include <vector>
 #include <string_view>
 
-namespace TVM
-{
-	class VM;
-	struct Register;
+class VM;
+struct VMRegister;
 
 class CPPFunction
 {
 public:
-	using TFunction = std::function<void(VM& vm, const std::vector<Register>&)>;
+	using TFunction = std::function<void(VM& vm, const std::vector<VMRegister>&)>;
 
-	TFunction function = nullptr;
+	TFunction func = nullptr;
 	const char* function_name;
 	const char* accepted_args;
 	const char* function_sig;
@@ -23,8 +21,8 @@ public:
 
 struct CPPLib
 {
-	std::unordered_map<std::string_view, Register> vars;
+	std::string name;
+	std::unordered_map<std::string_view, VMRegister> vars;
 	std::vector<CPPFunction> functions;
 };
 
-}

@@ -1,5 +1,6 @@
 #include "Compiler.h"
 #include "Lexer.h"
+#include "PreProcess.h"
 #include "Parser.h"
 
 #include <iostream>
@@ -19,12 +20,14 @@ namespace Compiler
 
 		// to vm bytecodes
 
-		std::vector<TVM::VM::Instruction> res;
+		std::vector<VM::Instruction> res;
+
+		//PreProcess(tokens);
 
 		Parse(tokens, res);
 
 		// tEMP  
-		TVM::VM vm;
+		VM vm;
 		vm.instructions = res;
 		vm.Init();
 		vm.Run();
@@ -36,16 +39,16 @@ namespace Compiler
 			{
 				switch (arg.type)
 				{
-				case TVM::RegisterType::FLOAT:
+				case RegisterType::FLOAT:
 					s += std::to_string(arg.value.flt);
 					break;
-				case TVM::RegisterType::INT:
+				case RegisterType::INT:
 					s += std::to_string(arg.value.num);
 					break;
-				case TVM::RegisterType::STRING:
+				case RegisterType::STRING:
 					s += arg.value.str;
 					break;
-				case TVM::RegisterType::REGISTER:
+				case RegisterType::REGISTER:
 					s += 'r' + std::to_string(arg.value.num);
 					break;
 				}

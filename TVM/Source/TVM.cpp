@@ -5,13 +5,10 @@
 #include <string>
 #include <iostream>
 
-namespace TVM
-{
-
 void VM::Init()
 {
 	// #todo #include brrr
-	IO::Register(*this);
+	IO::RegisterToVM(*this);
 
 	rel_reg_stack.push(0);
 }
@@ -76,17 +73,17 @@ void VM::Run()
 	}
 }
 
-void VM::OpMove(const Register& dst, const Register& src)
+void VM::OpMove(const VMRegister& dst, const VMRegister& src)
 {
 	assert(dst.type == REGISTER);
-	Register& dst_reg = registers[dst.value.num + relative_register_index];
+	VMRegister& dst_reg = registers[dst.value.num + relative_register_index];
 	dst_reg = src;
 }
 
-void VM::OpAdd(const Register& dst, const Register& a, const Register& b)
+void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	Register* l = nullptr;
-	Register* r = nullptr;
+	VMRegister* l = nullptr;
+	VMRegister* r = nullptr;
 	if (a.type == REGISTER)
 		l = &registers[a.value.num + relative_register_index];
 	if (b.type == REGISTER)
@@ -94,7 +91,7 @@ void VM::OpAdd(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
 	//*dst_reg = *l;
 
 	switch (l->type)
@@ -114,10 +111,10 @@ void VM::OpAdd(const Register& dst, const Register& a, const Register& b)
 	}
 }
 
-void VM::OpSubtract(const Register& dst, const Register& a, const Register& b)
+void VM::OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	Register* l = nullptr;
-	Register* r = nullptr;
+	VMRegister* l = nullptr;
+	VMRegister* r = nullptr;
 	if (a.type == REGISTER)
 		l = &registers[a.value.num + relative_register_index];
 	if (b.type == REGISTER)
@@ -125,7 +122,7 @@ void VM::OpSubtract(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
 	//*dst_reg = *l;
 
 	switch (l->type)
@@ -145,10 +142,10 @@ void VM::OpSubtract(const Register& dst, const Register& a, const Register& b)
 	}
 }
 
-void VM::OpMultiply(const Register& dst, const Register& a, const Register& b)
+void VM::OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	Register* l = nullptr;
-	Register* r = nullptr;
+	VMRegister* l = nullptr;
+	VMRegister* r = nullptr;
 	if (a.type == REGISTER)
 		l = &registers[a.value.num + relative_register_index];
 	if (b.type == REGISTER)
@@ -156,7 +153,7 @@ void VM::OpMultiply(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
 	//*dst_reg = *l;
 
 	switch (l->type)
@@ -174,10 +171,10 @@ void VM::OpMultiply(const Register& dst, const Register& a, const Register& b)
 	}
 }
 
-void VM::OpDivide(const Register& dst, const Register& a, const Register& b)
+void VM::OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	Register* l = nullptr;
-	Register* r = nullptr;
+	VMRegister* l = nullptr;
+	VMRegister* r = nullptr;
 	if (a.type == REGISTER)
 		l = &registers[a.value.num + relative_register_index];
 	if (b.type == REGISTER)
@@ -185,7 +182,7 @@ void VM::OpDivide(const Register& dst, const Register& a, const Register& b)
 
 	assert(l && r);
 
-	Register* dst_reg = &registers[dst.value.num + relative_register_index];
+	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
 	*dst_reg = *l;
 
 	switch (l->type)
@@ -203,25 +200,36 @@ void VM::OpDivide(const Register& dst, const Register& a, const Register& b)
 	}
 }
 
-void VM::OpLabel(const Register& a)
+void VM::OpLabel(const VMRegister& a)
 {
 	labels[a.value.str] = instruction_pointer;
 }
 
-void VM::OpCall(const std::vector<Register>& args)
+void VM::OpCall(const std::vector<VMRegister>& args)
 {
 	BeginRelativeRegIndex(instruction_pointer);
 
-	auto it = functions.find(args[0].value.str);
-	if (it != functions.end())
-		it->second.function(*this, args);
+	auto function_it = functions.find(args[0].value.str);
+	if (function_it != functions.end())
+		function_it->second.func(*this, args);
 	else
-		throw std::runtime_error("no function like that");
+	{
+		auto labels_it = labels.find(args[0].value.str);
+		if (labels_it != labels.end())
+		{
+			// go to label 
+			instruction_pointer = labels_it->second;
+		}
+		else
+		{
+			throw std::runtime_error("no function like that");
+		}
+	}
 
 	EndRelativeRegIndex();
 }
 
-Register& VM::GetReg(uint64_t index)
+VMRegister& VM::GetReg(uint64_t index)
 {
 	assert(index + relative_register_index < registers.size() && "iNCcrease Vm Registers size");
 
@@ -233,7 +241,7 @@ Register& VM::GetReg(uint64_t index)
 //
 //}
 
-void VM::OpJump(const Register& a)
+void VM::OpJump(const VMRegister& a)
 {
 	instruction_pointer = a.value.num;
 }
@@ -252,4 +260,3 @@ void VM::EndRelativeRegIndex()
 	rel_reg_stack.pop();
 }
 
-}

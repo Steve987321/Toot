@@ -9,8 +9,6 @@
 namespace Compiler
 {
 
-using namespace TVM;
-
 struct FunctionArgs
 {
 
@@ -23,11 +21,11 @@ static std::vector<std::string> errors;
 
 static size_t register_pos = 0;
 static std::set<std::string> function_sigs;
-static std::stack<std::unordered_map<std::string_view, Register>> vars;
+static std::vector<std::unordered_map<std::string_view, VMRegister>> vars;
 
 static std::vector<VM::Instruction> parse_res;
 
-extern Register Expression();
+extern VMRegister Expression();
 
 template<typename ...TArgs> 
 static void AddError(std::string_view format, TArgs... args)
@@ -38,41 +36,41 @@ static void AddError(std::string_view format, TArgs... args)
 	errors.emplace_back(buf);
 }
 
-static Register CreateRegisterDst(int reg)
+static VMRegister CreateRegisterDst(int reg)
 {
-	Register dst{};
+	VMRegister dst{};
 	dst.value.num = reg;
 	dst.type = REGISTER;
 	return dst;
 }
 
-static Register* GetVarRegister(const std::string& id)
+static VMRegister* GetVarRegister(const std::string& id)
 {
-	auto pos = vars.top().find(id);
-	if (pos != vars.top().end())
+	auto pos = vars.back().find(id);
+	if (pos != vars.back().end())
 		return &pos->second;
 
 	return nullptr;
 }
 
 // temp
-static void PrintInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args = {})
+static void PrintInstruction(OP_CODE op_code, std::vector<VMRegister> args = {})
 {
 	std::string s = op_code_names[op_code] + ' ';
-	for (const Register& arg : args)
+	for (const VMRegister& arg : args)
 	{
 		switch (arg.type)
 		{
-		case TVM::RegisterType::FLOAT:
+		case VMRegisterType::FLOAT:
 			s += std::to_string(arg.value.flt);
 			break;
-		case TVM::RegisterType::INT:
+		case VMRegisterType::INT:
 			s += std::to_string(arg.value.num);
 			break;
-		case TVM::RegisterType::STRING:
+		case VMRegisterType::STRING:
 			s += arg.value.str;
 			break;
-		case TVM::RegisterType::REGISTER:
+		case VMRegisterType::REGISTER:
 			s += 'r' + std::to_string(arg.value.num);
 			break;
 		}
@@ -82,7 +80,7 @@ static void PrintInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> ar
 	std::cout << s << std::endl;
 }
 
-static void AddInstruction(TVM::OP_CODE op_code, std::vector<TVM::Register> args = {})
+static void AddInstruction(OP_CODE op_code, std::vector<VMRegister> args = {})
 {
 	// temp
 	PrintInstruction(op_code, args);
@@ -99,7 +97,7 @@ static void IncrementToken()
 		token = nullptr;
 }
 
-static std::string RegToType(const Register& reg)
+static std::string RegToType(const VMRegister& reg)
 {
 	switch (reg.type)
 	{
@@ -117,11 +115,11 @@ static std::string RegToType(const Register& reg)
 }
 
 // Checks the registers and returns the comma separated types a=1;b=2; (r0, r1) = (int, int)
-static std::string RegsToTypes(const std::vector<TVM::Register>& args)
+static std::string RegsToTypes(const std::vector<VMRegister>& args)
 {
 	std::string res;
 
-	for (const Register& reg : args)
+	for (const VMRegister& reg : args)
 		res += RegToType(reg);
 
 	return res;
@@ -136,11 +134,34 @@ static Token* PeekNextToken()
 	return res;
 }
 
-extern Register PlusMinus();
-
-static Register Unary()
+static Token* PeekPreviousToken()
 {
-	Register res {};
+	Token* res = nullptr;
+	if (pos != 0)
+		res = &current_tokens[pos - 1];
+
+	return res;
+}
+
+static bool IsTokenKeyword(Token& token)
+{
+	return token.type == TOKEN_TYPE::INT || token.type == TOKEN_TYPE::FLOAT /*|| token.type == TOKEN_TYPE::STRING*/;
+}
+
+static bool IsTokenOperatorAssign(Token& token)
+{
+	return token.type == TOKEN_TYPE::DIVIDE_AND_ASSIGN ||
+		token.type == TOKEN_TYPE::MULTIPLY_AND_ASSIGN ||
+		token.type == TOKEN_TYPE::PLUS_AND_ASSIGN ||
+		token.type == TOKEN_TYPE::MINUS_AND_ASSIGN ||
+		token.type == TOKEN_TYPE::ASSIGNMENT;
+}
+
+extern VMRegister PlusMinus();
+
+static VMRegister Unary()
+{
+	VMRegister res {};
 	res.type = INT;
 	res.value.num = -1;
 
@@ -159,7 +180,7 @@ static Register Unary()
 		{
 			if (is_unary_min || is_not)
 			{
-				Register dst = CreateRegisterDst(register_pos);
+				VMRegister dst = CreateRegisterDst(register_pos);
 				res.value.num = register_pos;
 				register_pos++;
 
@@ -181,7 +202,7 @@ static Register Unary()
 		res.type = REGISTER;
 
 		// get var register
-		Register* reg = GetVarRegister(token->str);
+		VMRegister* reg = GetVarRegister(token->str);
 		if (!reg)
 		{
 			// check function signature
@@ -205,7 +226,7 @@ static Register Unary()
 		if (is_unary_min)
 			val = -val;
 
-		Register src{};
+		VMRegister src{};
 		src.type = INT;
 		src.value.num = val;
 
@@ -222,15 +243,15 @@ static Register Unary()
 	return res;
 }
 
-static Register Factor()
+static VMRegister Factor()
 {
-	Register a = Unary();
+	VMRegister a = Unary();
 	if (a.value.num == -1)
 	{
 		AddError("Unexpected token after: %s", token->str.c_str());
 	}
 
-	Register dst = a;
+	VMRegister dst = a;
 
 	Token* next = PeekNextToken();
 	if (next && (next->type == TOKEN_TYPE::MULTIPLY || next->type == TOKEN_TYPE::DIVIDE))
@@ -240,7 +261,7 @@ static Register Factor()
 		while (next && (next->type == TOKEN_TYPE::MULTIPLY || next->type == TOKEN_TYPE::DIVIDE))
 		{
 			IncrementToken();
-			Register b = Unary();
+			VMRegister b = Unary();
 			dst = CreateRegisterDst(register_pos);
 			register_pos++;
 
@@ -261,15 +282,15 @@ static Register Factor()
 	return dst;
 }
 
-static Register PlusMinus()
+static VMRegister PlusMinus()
 {
-	Register a = Factor();
+	VMRegister a = Factor();
 	if (a.value.num == -1)
 	{
 		AddError("Unexpected token after: {}", token->str);
 	}
 
-	Register dst = a;
+	VMRegister dst = a;
 
 	Token* next = PeekNextToken();
 	if (next && (next->type == TOKEN_TYPE::PLUS || next->type == TOKEN_TYPE::MINUS))
@@ -280,7 +301,7 @@ static Register PlusMinus()
 		{
 			IncrementToken();
 			int rp_prev = register_pos;
-			Register b = Factor();
+			VMRegister b = Factor();
 			dst = CreateRegisterDst(rp_prev);
 			register_pos = rp_prev + 1;
 
@@ -301,21 +322,60 @@ static Register PlusMinus()
 	return dst;
 }
 
-static Register IfStatement()
+static VMRegister IfStatement()
 {
 	return {};
 }
 
-static Register ForLoop()
+static VMRegister ForLoop()
 {
 	return {  };
 }
 
-static Register Identifier()
+static VMRegister Identifier()
 {
-	Register res{};
+	VMRegister res{};
 	res.type = STRING;
 	res.value.str = token->str.c_str();
+
+	// check if this identifier is a var that already exists 
+	for (size_t i = vars.size(); i-- > 0; )
+	{
+		auto varit = vars[i].find(res.value.str);
+		if (varit != vars[i].end())
+		{
+			res = varit->second;
+
+			Token* prev = PeekPreviousToken();
+			if (prev)
+			{
+				if (IsTokenKeyword(*prev))
+				{
+					AddError("Variable with identifier {} already exists", token->str);
+					return res;
+				}
+				else
+				{
+					// get the variable and checc
+					IncrementToken();
+					if (!token)
+						return res;
+					
+					if (IsTokenOperatorAssign(*token))
+					{
+						IncrementToken();
+						if (!token)
+							return res;
+
+						VMRegister reg = PlusMinus();
+						AddInstruction(OP_MOVE, { varit->second, reg });
+					}
+				}
+			}
+			
+			return res;
+		}
+	}
 
 	IncrementToken();
 
@@ -326,7 +386,7 @@ static Register Identifier()
 	if (token->type == TOKEN_TYPE::PARENTHESES_LEFT)
 	{
 		res.type = FUNCTION;
-		std::vector<Register> args_as_registers{};
+		std::vector<VMRegister> args_as_registers{};
 		std::string arg_list;
 
 		for (size_t i = pos; i < current_tokens.size(); i++)
@@ -335,7 +395,7 @@ static Register Identifier()
 
 			if (t.type == TOKEN_TYPE::IDENTIFIER)
 			{
-				Register* reg = GetVarRegister(t.str);
+				VMRegister* reg = GetVarRegister(t.str);
 
 				// #TODO VALIDATE FOR NUM VALUEs
 				if (reg)
@@ -343,7 +403,7 @@ static Register Identifier()
 					pos = i;
 					token = &current_tokens[i];
 					// numerical
-					Register arg = PlusMinus();
+					VMRegister arg = PlusMinus();
 
 					// check if -1 and in that case it probably ended the expression
 					if (arg.value.num != -1)
@@ -355,12 +415,12 @@ static Register Identifier()
 				}
 			}
 
-			if (t.type == TOKEN_TYPE::NUMBER || t.type == TOKEN_TYPE::FLOAT)
+			if (t.type == TOKEN_TYPE::NUMBER)
 			{
 				pos = i;
 				token = &current_tokens[i];
 				// numerical
-				Register arg = PlusMinus();
+				VMRegister arg = PlusMinus();
 
 				// check if -1 and in that case it probably ended the expression
 				if (arg.value.num != -1)
@@ -395,13 +455,13 @@ static Register Identifier()
 					return res;
 				}
 
+				// check if definition
 				if (next->type == TOKEN_TYPE::BRACKET_LEFT)
 				{
-					// definition
-					auto stored_sig = function_sigs.emplace(sig);
-					Register func{};
+					auto [stored_sig, _] = function_sigs.emplace(sig);
+					VMRegister func{};
 					func.type = STRING;
-					func.value.str = stored_sig.first->c_str();
+					func.value.str = stored_sig->c_str();
 
 					AddInstruction(OP_LABEL, {func});
 
@@ -412,18 +472,23 @@ static Register Identifier()
 				}
 				else if (next->type == TOKEN_TYPE::SEMICOLON)
 				{
-					// call
-					std::string func_name = sig.substr(0, sig.find(' '));
-					if (function_sigs.contains(func_name + " ..."))
-						sig = func_name + " ...";
-					else if (!function_sigs.contains(sig))
+					// check if there exists a signature that takes these argument types 
+					if (!function_sigs.contains(sig))
 					{
-						AddError("No function found with signature %s", sig.c_str());
-						return res;
+						// check if there exists a signature that takes all types 
+						std::string func_name = sig.substr(0, sig.find(' '));
+						if (function_sigs.contains(func_name + " ..."))
+							sig = func_name + " ...";
+						else
+						{
+							// cooked 
+							AddError("No function found with signature %s", sig.c_str());
+							return res;
+						}
 					}
-
+				
 					// #TODo: temp leak for now 
-					Register function_arg{};
+					VMRegister function_arg{};
 					function_arg.type = STRING;
 					void* p = malloc(sig.size());
 					assert(p);
@@ -458,7 +523,7 @@ static void IntKeyword()
 		return;
 	}
 
-	Register id_res = Identifier();
+	VMRegister id_res = Identifier();
 	
 	if (id_res.type == FUNCTION)
 	{
@@ -467,7 +532,7 @@ static void IntKeyword()
 	}
 	else
 	{
-		TVM::Register src{};
+		VMRegister src{};
 		src.type = INT;
 
 		if (token->type != TOKEN_TYPE::ASSIGNMENT)
@@ -478,15 +543,15 @@ static void IntKeyword()
 
 		IncrementToken();
 
-		TVM::Register dst{};
+		VMRegister dst{};
 		dst.type = REGISTER;
 		dst.value.num = register_pos;
 
 		if (token->type == TOKEN_TYPE::IDENTIFIER)
 		{
 			// get register index 
-			auto it = vars.top().find(token->str);
-			if (it != vars.top().end())
+			auto it = vars.back().find(token->str);
+			if (it != vars.back().end())
 			{
 				dst.value = it->second.value;
 				dst.type = REGISTER;
@@ -510,7 +575,7 @@ static void IntKeyword()
 			return;
 		}
 
-		vars.top().emplace(id_res.value.str, dst);
+		vars.back().emplace(id_res.value.str, dst);
 
 		IncrementToken();
 
@@ -525,16 +590,16 @@ static void IntKeyword()
 			return;
 		}
 
-		//AddInstruction(TVM::OP_CODE::OP_MOVE, { dst, src });
+		//AddInstruction(OP_CODE::OP_MOVE, { dst, src });
 		//register_pos++;
 
 		IncrementToken();
 	}
 }
 
-Register Expression()
+VMRegister Expression()
 {
-	Register res{};
+	VMRegister res{};
 
 	while (token)
 	{
@@ -558,14 +623,14 @@ Register Expression()
 		case TOKEN_TYPE::BRACKET_LEFT:
 		{
 			int reg_begin = register_pos;
-			vars.emplace();
+			vars.emplace({});
 			while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
 			{
 				IncrementToken();
 				Expression();
 			}
 			register_pos = reg_begin;
-			vars.pop();
+			vars.pop_back();
 			break;
 		}
 		case TOKEN_TYPE::IDENTIFIER:
@@ -575,7 +640,6 @@ Register Expression()
 			// probably encountered error but keep going so it doesnt get stuk
 			IncrementToken(); 
 			break;
-
 		}
 
 		if (errors.size() > 50)
@@ -584,6 +648,12 @@ Register Expression()
 
 
 	return res;
+}
+
+void AddLibToParserCtx(const CPPLib& lib)
+{
+	for (const CPPFunction& f : lib.functions)
+		function_sigs.emplace(f.function_sig);
 }
 
 bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res)
@@ -595,22 +665,19 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 	current_tokens = tokens;
 
 	if (current_tokens.empty())
-		return false; // broterman
+		return false; // https://www.youtube.com/watch?v=Unzc731iCUY
 
 	pos = 0;
 	token = &current_tokens[0];
 
 	// begin the global scope 
-	vars.emplace();
+	vars.emplace({});
 	
-	for (CPPFunction& function : IO::GetIOLib().functions)
-	{
-		function_sigs.emplace(std::string(function.function_name) + ' ' + function.accepted_args);
-	}
+	AddLibToParserCtx(IO::GetIOLib());
 
 	Expression();
 
-	vars.pop();
+	vars.pop_back();
 
 	op_codes_res = parse_res;
 

@@ -1,33 +1,32 @@
 #include "IO.h"
-
 #include "TVM.h"
-#include "TVMRegister.h"
 
 #include <cassert>
 
-using namespace TVM;
+#define REGISTER_LIBFUNC(lib, function, sig)								\
+lib.functions.emplace_back(function, #function, sig, #function " " sig);	\
 
 namespace IO
 {
-	void WriteOut(VM& vm, const std::vector<TVM::Register>& args)
+	void WriteOut(VM& vm, const std::vector<VMRegister>& args)
 	{
 		// first arg is the function
-		TVM::Register reg = args[1];
-		while (reg.type == REGISTER)
+		VMRegister reg = args[1];
+		while (reg.type == VMRegisterType::REGISTER)
 			reg = vm.GetReg(reg.value.num);
-			//reg = vm.GetReg(reg.value.num);
 
 		switch (reg.type)
 		{
-		case FUNCTION:
+		case VMRegisterType::FUNCTION:
+			assert(false && "redart");
 			break;
-		case STRING:
+		case VMRegisterType::STRING:
 			std::cout << reg.value.str;
 			break;
-		case FLOAT:
+		case VMRegisterType::FLOAT:
 			std::cout << reg.value.flt;
 			break;
-		case INT:
+		case VMRegisterType::INT:
 			std::cout << reg.value.num;
 			break;
 		default:
@@ -38,10 +37,13 @@ namespace IO
 	CPPLib GetIOLib()
 	{
 		CPPLib l;
-		l.functions.emplace_back(WriteOut, "WriteOut", "...");
+		l.name = "io";
 
-		TVM::Register pi{};
-		pi.type = FLOAT;
+		REGISTER_LIBFUNC(l, WriteOut, "...");
+		REGISTER_LIBFUNC(l, Nothing, "int int");
+
+		VMRegister pi{};
+		pi.type = VMRegisterType::FLOAT;
 		pi.value.flt = 3.141f;
 
 		l.vars["PI"] = pi;
@@ -49,9 +51,14 @@ namespace IO
 		return l;
 	}
 	
-	void Register(VM& vm)
+	void RegisterToVM(VM& vm)
 	{
-		CPPFunction FWriteOut{WriteOut, "WriteOut", "...", "WriteOut ..."};
-		vm.functions[FWriteOut.function_sig] = FWriteOut;
+		CPPLib lib = GetIOLib();
+		for (const CPPFunction& f : lib.functions)
+		{
+			vm.functions[f.function_sig] = f;
+		}
+
+		// #TODO: vars
 	}
 }
