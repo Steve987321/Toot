@@ -1,0 +1,297 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5F34E89CBA763C0E8DD086DC /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0A7F66042192013611ADFC44 /* Parser.cpp */; };
+		63A700029338CEF46E460E42 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F968A30A9C56C9BC2B7CA94A /* Lexer.cpp */; };
+		6F3ECE3869008AAAA2FF8C78 /* Compiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7E20D1E0C691B6120B308820 /* Compiler.cpp */; };
+		7126958CC7B3FFFEA02D13CC /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E684C9F4E9F59C266B624034 /* Main.cpp */; };
+		C2BF0737C261EA69FCB69D77 /* libTVM.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 22BC56BF7A21C9B12C2FE4FF /* libTVM.a */; };
+		F3D517AE3823BD207A4AF5EE /* PreProcess.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E707DCF608D38A284588B336 /* PreProcess.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0193A552FAF9A6C4EE950392 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2F7D1E9F293EDB11633DDCDF /* ../TVM/TVM.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = E411D6EC8864749E9A9CBD2C;
+			remoteInfo = libTVM.a;
+		};
+		AF5932B9A8BF342B9C5A90F9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2F7D1E9F293EDB11633DDCDF /* ../TVM/TVM.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2089DFC64F3033B8A8718E06;
+			remoteInfo = libTVM.a;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0A7F66042192013611ADFC44 /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Parser.cpp; path = Source/Parser.cpp; sourceTree = "<group>"; };
+		1D1B3EEA342DDA1C2449D52A /* Compiler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Compiler.h; path = Source/Compiler.h; sourceTree = "<group>"; };
+		2F7D1E9F293EDB11633DDCDF /* libTVM.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "TVM.xcodeproj"; path = ../TVM/TVM.xcodeproj; sourceTree = SOURCE_ROOT; };
+		45126274E9650026FB9D48B4 /* Lexer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Lexer.h; path = Source/Lexer.h; sourceTree = "<group>"; };
+		5B915300A4023732E8A10940 /* PreProcess.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PreProcess.h; path = Source/PreProcess.h; sourceTree = "<group>"; };
+		7E20D1E0C691B6120B308820 /* Compiler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Compiler.cpp; path = Source/Compiler.cpp; sourceTree = "<group>"; };
+		D934404EDCA512805E11B68E /* Parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Parser.h; path = Source/Parser.h; sourceTree = "<group>"; };
+		E10FD3C40FB627B668F78204 /* Compiler */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = Compiler; path = Compiler; sourceTree = BUILT_PRODUCTS_DIR; };
+		E684C9F4E9F59C266B624034 /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = Source/Main.cpp; sourceTree = "<group>"; };
+		E707DCF608D38A284588B336 /* PreProcess.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PreProcess.cpp; path = Source/PreProcess.cpp; sourceTree = "<group>"; };
+		F968A30A9C56C9BC2B7CA94A /* Lexer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Lexer.cpp; path = Source/Lexer.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		15868734680CB2263A511574 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C2BF0737C261EA69FCB69D77 /* libTVM.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		671074A073CD2412E8B792E0 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXGroup section */
+		86BE311B7B34A84DCA08475B /* Compiler */ = {
+			isa = PBXGroup;
+			children = (
+				7E20D1E0C691B6120B308820 /* Compiler.cpp */,
+				1D1B3EEA342DDA1C2449D52A /* Compiler.h */,
+				F968A30A9C56C9BC2B7CA94A /* Lexer.cpp */,
+				45126274E9650026FB9D48B4 /* Lexer.h */,
+				E684C9F4E9F59C266B624034 /* Main.cpp */,
+				0A7F66042192013611ADFC44 /* Parser.cpp */,
+				D934404EDCA512805E11B68E /* Parser.h */,
+				E707DCF608D38A284588B336 /* PreProcess.cpp */,
+				5B915300A4023732E8A10940 /* PreProcess.h */,
+				A6C936B49B3FADE6EA134CF4 /* Products */,
+				9D968EAA920D05DCE0E0A4EA /* Projects */,
+			);
+			name = Compiler;
+			sourceTree = "<group>";
+		};
+		9D968EAA920D05DCE0E0A4EA /* Projects */ = {
+			isa = PBXGroup;
+			children = (
+				2F7D1E9F293EDB11633DDCDF /* TVM.xcodeproj */,
+			);
+			name = Projects;
+			sourceTree = "<group>";
+		};
+		A5C0CCD9BCD3680BACEF6319 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				22BC56BF7A21C9B12C2FE4FF /* libTVM.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A6C936B49B3FADE6EA134CF4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E10FD3C40FB627B668F78204 /* Compiler */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		758A432A19DCE0DC2C15296A /* Compiler */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03C1CF935647FA85288C5DD3 /* Build configuration list for PBXNativeTarget "Compiler" */;
+			buildPhases = (
+				856E07D4D7F432C6AA389614 /* Resources */,
+				EF1B212B41A14C1D13E5AF6B /* Sources */,
+				15868734680CB2263A511574 /* Frameworks */,
+				671074A073CD2412E8B792E0 /* Embed Libraries */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				937909E2AA8BA5149AA7A022 /* PBXTargetDependency */,
+			);
+			name = Compiler;
+			productInstallPath = "$(HOME)/bin";
+			productName = Compiler;
+			productReference = E10FD3C40FB627B668F78204 /* Compiler */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Compiler" */;
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 1;
+			mainGroup = 86BE311B7B34A84DCA08475B /* Compiler */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = A5C0CCD9BCD3680BACEF6319 /* Products */;
+					ProjectRef = 2F7D1E9F293EDB11633DDCDF /* TVM.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				758A432A19DCE0DC2C15296A /* Compiler */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		22BC56BF7A21C9B12C2FE4FF /* libTVM.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libTVM.a;
+			remoteRef = AF5932B9A8BF342B9C5A90F9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXResourcesBuildPhase section */
+		856E07D4D7F432C6AA389614 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EF1B212B41A14C1D13E5AF6B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6F3ECE3869008AAAA2FF8C78 /* Compiler.cpp in Sources */,
+				63A700029338CEF46E460E42 /* Lexer.cpp in Sources */,
+				7126958CC7B3FFFEA02D13CC /* Main.cpp in Sources */,
+				5F34E89CBA763C0E8DD086DC /* Parser.cpp in Sources */,
+				F3D517AE3823BD207A4AF5EE /* PreProcess.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		937909E2AA8BA5149AA7A022 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = libTVM.a;
+			targetProxy = 0193A552FAF9A6C4EE950392 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		15238E136BB0F885442A0C53 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../bin/Release-macosx-x86_64";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = Compiler;
+			};
+			name = Release;
+		};
+		2680100A333CBF7CA8272E4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = "../bin-intermediate/Debug-macosx-x86_64/Debug/Compiler";
+				ONLY_ACTIVE_ARCH = NO;
+				SYMROOT = "../bin/Debug-macosx-x86_64";
+				USER_HEADER_SEARCH_PATHS = (
+					../TVM/Source,
+				);
+			};
+			name = Debug;
+		};
+		6146D8D94C32FECB9418C719 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = "../bin/Debug-macosx-x86_64";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_DYNAMIC_NO_PIC = NO;
+				INSTALL_PATH = /usr/local/bin;
+				PRODUCT_NAME = Compiler;
+			};
+			name = Debug;
+		};
+		BB2C14C4E9D268B64313C304 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++2a";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = "../bin-intermediate/Release-macosx-x86_64/Release/Compiler";
+				ONLY_ACTIVE_ARCH = NO;
+				SYMROOT = "../bin/Release-macosx-x86_64";
+				USER_HEADER_SEARCH_PATHS = (
+					../TVM/Source,
+				);
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03C1CF935647FA85288C5DD3 /* Build configuration list for PBXNativeTarget "Compiler" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6146D8D94C32FECB9418C719 /* Debug */,
+				15238E136BB0F885442A0C53 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "Compiler" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2680100A333CBF7CA8272E4A /* Debug */,
+				BB2C14C4E9D268B64313C304 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+};
+rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

@@ -11,7 +11,10 @@ project "Compiler"
         "Source/**.h",
     }
 
-	-- update this  
 	includedirs {
-		"Source/",
+		"../TVM/Source/",
+	}
+
+	links {
+		"TVM"
 	}
