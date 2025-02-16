@@ -157,7 +157,7 @@ static bool IsTokenOperatorAssign(Token& token)
 		token.type == TOKEN_TYPE::ASSIGNMENT;
 }
 
-extern VMRegister PlusMinus();
+static VMRegister PlusMinus();
 
 static VMRegister Unary()
 {
@@ -287,7 +287,7 @@ static VMRegister PlusMinus()
 	VMRegister a = Factor();
 	if (a.value.num == -1)
 	{
-		AddError("Unexpected token after: {}", token->str);
+		AddError("Unexpected token after: {}", token->str.c_str());
 	}
 
 	VMRegister dst = a;
@@ -329,7 +329,7 @@ static VMRegister IfStatement()
 
 static VMRegister ForLoop()
 {
-	return {  };
+	return {};
 }
 
 static VMRegister Identifier()
@@ -351,7 +351,7 @@ static VMRegister Identifier()
 			{
 				if (IsTokenKeyword(*prev))
 				{
-					AddError("Variable with identifier {} already exists", token->str);
+					AddError("Variable with identifier {} already exists", token->str.c_str());
 					return res;
 				}
 				else
@@ -622,8 +622,8 @@ VMRegister Expression()
 			break;
 		case TOKEN_TYPE::BRACKET_LEFT:
 		{
-			int reg_begin = register_pos;
-			vars.emplace({});
+			size_t reg_begin = register_pos;
+			vars.push_back({});
 			while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
 			{
 				IncrementToken();
@@ -633,6 +633,11 @@ VMRegister Expression()
 			vars.pop_back();
 			break;
 		}
+        case TOKEN_TYPE::BRACKET_RIGHT:
+        {
+            return {};
+            break;
+        }
 		case TOKEN_TYPE::IDENTIFIER:
 			Identifier();
 			break;
@@ -671,7 +676,7 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 	token = &current_tokens[0];
 
 	// begin the global scope 
-	vars.emplace({});
+	vars.push_back({});
 	
 	AddLibToParserCtx(IO::GetIOLib());
 

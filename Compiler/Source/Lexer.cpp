@@ -217,6 +217,12 @@ namespace Compiler
 		case ')':
 			res.type = TOKEN_TYPE::PARENTHESES_RIGHT;
 			break;
+        case '{':
+            res.type = TOKEN_TYPE::BRACKET_LEFT;
+            break;
+        case '}':
+            res.type = TOKEN_TYPE::BRACKET_RIGHT;
+            break;
 		case '=':
 			res.type = TOKEN_TYPE::ASSIGNMENT;
 			CheckFinishToken(res, '=', TOKEN_TYPE::COMPARISON);
