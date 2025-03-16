@@ -19,7 +19,7 @@ namespace Compiler
 			return CompileResult::ERR;
 
 		// to vm bytecodes
-
+        
 		std::vector<VM::Instruction> res;
 
 		//PreProcess(tokens);

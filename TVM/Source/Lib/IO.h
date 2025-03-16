@@ -14,12 +14,9 @@ struct VMRegister;
 namespace IO
 {
 	// Writes to stdout
-	void WriteOut(VM& vm, const std::vector<VMRegister>& args);
+	VMRegister WriteOut(VM& vm, const std::vector<VMRegister>& args);
 
-	// testing the explicit argument types 
-	inline void Nothing(VM& vm, const std::vector<VMRegister>& args)
-	{
-	}
+	VMRegister Nothing(VM& vm, const std::vector<VMRegister>& args);
 
 	// for the parser and vm 
 	CPPLib GetIOLib();

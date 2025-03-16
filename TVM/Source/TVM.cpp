@@ -11,6 +11,20 @@ void VM::Init()
 	IO::RegisterToVM(*this);
 
 	rel_reg_stack.push(0);
+
+	// register labels 
+	size_t loc = 0;
+	for (const Instruction& i : instructions)
+	{
+		if (i.op == OP_DEFINE_LABEL)
+		{
+			// add to functions or if just label add to somethign eles
+			assert(i.args.size() == 1);
+			OpLabel(i.args[0], loc);
+			break;
+		}
+		loc++;
+	}
 }
 
 void VM::Run()
@@ -21,11 +35,6 @@ void VM::Run()
 
 		switch (i.op)
 		{
-		case OP_LABEL:
-			// add to functions or if just label add to somethign eles
-			assert(i.args.size() == 1);
-			OpLabel(i.args[0]);
-			break;
 		case OP_MOVE:
 			assert(i.args.size() == 2);
 			OpMove(i.args[0], i.args[1]);
@@ -55,14 +64,17 @@ void VM::Run()
 		case OP_CALL:
 			OpCall(i.args);
 			break;
+        case OP_CALL_MOVE:
+           	OpCallMove(i.reserved, i.args);
+            break;
 		case OP_JUMP:
 			assert(i.args.size() == 1);
 			OpJump(i.args[0]);
 			break;
-		case OP_JUMPIFNOTZERO:
-			break;
-		case OP_JUMPIFZERO:
-			break;
+        case OP_JUMP_IF_NOT_EQUAL:
+            assert(i.args.size() == 3);
+            OpJumpIfNotEqual(i.args[0], i.args[1], i.args[2]);
+            break;
 		case OP_RETURN:
 			break;
 		default: 
@@ -75,18 +87,29 @@ void VM::Run()
 
 void VM::OpMove(const VMRegister& dst, const VMRegister& src)
 {
-	assert(dst.type == REGISTER);
-	VMRegister& dst_reg = registers[dst.value.num + relative_register_index];
-	dst_reg = src;
+	assert(dst.type == VMRegisterType::REGISTER);
+    
+	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
+    VMRegister* src_reg = nullptr;
+    if (src.type == VMRegisterType::REGISTER)
+    {
+        src_reg = &registers[src.value.num + relative_register_index];
+        while (src_reg->type == VMRegisterType::REGISTER)
+            src_reg = &registers[src_reg->value.num + relative_register_index];
+        
+        *dst_reg = *src_reg;
+    }
+    else
+        *dst_reg = src;
 }
 
 void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
 	VMRegister* l = nullptr;
 	VMRegister* r = nullptr;
-	if (a.type == REGISTER)
+	if (a.type == VMRegisterType::REGISTER)
 		l = &registers[a.value.num + relative_register_index];
-	if (b.type == REGISTER)
+	if (b.type == VMRegisterType::REGISTER)
 		r = &registers[b.value.num + relative_register_index];
 
 	assert(l && r);
@@ -96,16 +119,16 @@ void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 
 	switch (l->type)
 	{
-	case STRING:
-		break;
-	case FLOAT:
-		dst_reg->type = FLOAT;
-		dst_reg->value.flt = l->value.num + r->value.flt;
-		break;
-	case INT:
-		dst_reg->type = INT;
-		dst_reg->value.num = l->value.num + r->value.num;
-		break;
+    case VMRegisterType::STRING:
+        break;
+    case VMRegisterType::FLOAT:
+        dst_reg->type = VMRegisterType::FLOAT;
+        dst_reg->value.flt = l->value.num + r->value.flt;
+        break;
+    case VMRegisterType::INT:
+        dst_reg->type = VMRegisterType::INT;
+        dst_reg->value.num = l->value.num + r->value.num;
+        break;
 	default:
 		break;
 	}
@@ -115,9 +138,9 @@ void VM::OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister
 {
 	VMRegister* l = nullptr;
 	VMRegister* r = nullptr;
-	if (a.type == REGISTER)
+	if (a.type == VMRegisterType::REGISTER)
 		l = &registers[a.value.num + relative_register_index];
-	if (b.type == REGISTER)
+	if (b.type == VMRegisterType::REGISTER)
 		r = &registers[b.value.num + relative_register_index];
 
 	assert(l && r);
@@ -127,14 +150,14 @@ void VM::OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister
 
 	switch (l->type)
 	{
-	case STRING:
+    case VMRegisterType::STRING:
 		break;
-	case FLOAT:
-		dst_reg->type = FLOAT;
+    case VMRegisterType::FLOAT:
+		dst_reg->type = VMRegisterType::FLOAT;
 		dst_reg->value.flt = l->value.flt - r->value.flt;
 		break;
-	case INT:
-		dst_reg->type = INT;
+    case VMRegisterType::INT:
+		dst_reg->type = VMRegisterType::INT;
 		dst_reg->value.num = l->value.num - r->value.num;
 		break;
 	default:
@@ -146,9 +169,9 @@ void VM::OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister
 {
 	VMRegister* l = nullptr;
 	VMRegister* r = nullptr;
-	if (a.type == REGISTER)
+	if (a.type == VMRegisterType::REGISTER)
 		l = &registers[a.value.num + relative_register_index];
-	if (b.type == REGISTER)
+	if (b.type == VMRegisterType::REGISTER)
 		r = &registers[b.value.num + relative_register_index];
 
 	assert(l && r);
@@ -158,13 +181,13 @@ void VM::OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister
 
 	switch (l->type)
 	{
-	case FLOAT:
-		dst_reg->type = FLOAT;
-		dst_reg->value.flt = l->value.flt * r->value.flt;
+        case VMRegisterType::FLOAT:
+            dst_reg->type = VMRegisterType::FLOAT;
+            dst_reg->value.flt = l->value.flt * r->value.flt;
 		break;
-	case INT:
-		dst_reg->type = INT;
-		dst_reg->value.num = l->value.num * r->value.num;
+        case VMRegisterType::INT:
+            dst_reg->type = VMRegisterType::INT;
+            dst_reg->value.num = l->value.num * r->value.num;
 		break;
 	default:
 		break;
@@ -175,9 +198,9 @@ void VM::OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& 
 {
 	VMRegister* l = nullptr;
 	VMRegister* r = nullptr;
-	if (a.type == REGISTER)
+	if (a.type == VMRegisterType::REGISTER)
 		l = &registers[a.value.num + relative_register_index];
-	if (b.type == REGISTER)
+	if (b.type == VMRegisterType::REGISTER)
 		r = &registers[b.value.num + relative_register_index];
 
 	assert(l && r);
@@ -187,12 +210,12 @@ void VM::OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& 
 
 	switch (l->type)
 	{
-	case FLOAT:
-		dst_reg->type = FLOAT;
+    case VMRegisterType::FLOAT:
+		dst_reg->type = VMRegisterType::FLOAT;
 		dst_reg->value.flt = l->value.flt / r->value.flt;
 		break;
-	case INT:
-		dst_reg->type = INT;
+    case VMRegisterType::INT:
+		dst_reg->type = VMRegisterType::INT;
 		dst_reg->value.num = l->value.num / r->value.num;
 		break;
 	default:
@@ -200,9 +223,10 @@ void VM::OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& 
 	}
 }
 
-void VM::OpLabel(const VMRegister& a)
+void VM::OpLabel(const VMRegister& a, size_t ip)
 {
-	labels[a.value.str] = instruction_pointer;
+	pre_label_ip = ip;
+    labels[a.value.num] = ip;
 }
 
 void VM::OpCall(const std::vector<VMRegister>& args)
@@ -214,7 +238,7 @@ void VM::OpCall(const std::vector<VMRegister>& args)
 		function_it->second.func(*this, args);
 	else
 	{
-		auto labels_it = labels.find(args[0].value.str);
+		auto labels_it = labels.find(args[0].value.num);
 		if (labels_it != labels.end())
 		{
 			// go to label 
@@ -227,6 +251,17 @@ void VM::OpCall(const std::vector<VMRegister>& args)
 	}
 
 	EndRelativeRegIndex();
+}
+
+void VM::OpCallMove(const VMRegister& dst, const std::vector<VMRegister>& args)
+{
+    BeginRelativeRegIndex(instruction_pointer);
+
+    auto function_it = functions.find(args[0].value.str);
+    if (function_it != functions.end())
+        OpMove(dst, function_it->second.func(*this, args));
+
+    EndRelativeRegIndex();
 }
 
 VMRegister& VM::GetReg(uint64_t index)
@@ -243,7 +278,33 @@ VMRegister& VM::GetReg(uint64_t index)
 
 void VM::OpJump(const VMRegister& a)
 {
-	instruction_pointer = a.value.num;
+    instruction_pointer = labels.find(a.value.num)->second;
+}
+
+void VM::OpJumpIfNotEqual(const VMRegister& jump, const VMRegister& a, const VMRegister& b)
+{
+    bool v = false;
+    VMRegister* l = &registers[a.value.num];
+    VMRegister* r = &registers[b.value.num];
+    
+    assert(l && r);
+    
+    switch(l->type)
+    {
+        case VMRegisterType::INT:
+            v = l->value.num != r->value.num;
+            break;
+        case VMRegisterType::FLOAT:
+            v = l->value.flt != r->value.flt;
+            break;
+        default:
+            break;
+    }
+
+    if (v)
+    {
+        instruction_pointer = labels.find(jump.value.num)->second;
+    }
 }
 
 void VM::BeginRelativeRegIndex(uint64_t rel)
@@ -254,8 +315,6 @@ void VM::BeginRelativeRegIndex(uint64_t rel)
 
 void VM::EndRelativeRegIndex()
 {
-	// #TODO: uwnind registers from previous call
-
 	relative_register_index -= rel_reg_stack.top();
 	rel_reg_stack.pop();
 }

@@ -12,7 +12,7 @@
 
 enum OP_CODE
 {
-	OP_LABEL,
+	OP_DEFINE_LABEL,
 	OP_MOVE,
 	OP_ADD,
 	OP_SUBTRACT,
@@ -21,26 +21,30 @@ enum OP_CODE
 	OP_NEGATE,
 	OP_NOT,
 	OP_CALL,
+    OP_CALL_MOVE, // first arg is destination rest is function args
 	OP_JUMP,
-	OP_JUMPIFNOTZERO,
-	OP_JUMPIFZERO,
-	OP_JUMPIFGREATER,
-	OP_JUMPIFLESS,
-	OP_JUMPIFNOTEQUAL,
-	OP_JUMPIFEQUAL,
-	//OP_SETRELREGINDEX, // for the vm to handle 
+	OP_JUMP_IF_NOT_EQUAL,
+	OP_JUMP_IF_EQUAL,
+	//OP_SETRELREGINDEX, // for the vm to handle
 	OP_RETURN,
 	BYTE_CODE_COUNT,
 };
 
-enum VMRegisterType
+enum class VMRegisterType
 {
+	INVALID, // invalid
 	REGISTER, // for args
 	FUNCTION, // for parser
 	STRING,
 	FLOAT,
 	INT,
 };
+
+//struct VMString
+//{
+//    char* start;
+//    size_t size;
+//};
 
 union VMRegisterValue
 {
@@ -53,7 +57,7 @@ union VMRegisterValue
 struct VMRegister
 {
 	VMRegisterValue value;
-	VMRegisterType type;
+	VMRegisterType type; // zero initialized to INVALID
 };
 
 class VM
@@ -65,15 +69,19 @@ public:
 	std::stack<uint64_t> rel_reg_stack;
 
 	uint64_t instruction_pointer = 0;
+	uint64_t pre_label_ip = 0;
+
 	struct Instruction
 	{
 		OP_CODE op;
 		std::vector<VMRegister> args;
+		VMRegister reserved;
 	};
 
 	std::vector<Instruction> instructions;
 
-	std::unordered_map<std::string_view, uint64_t> labels;
+	// id - ip 
+	std::unordered_map<uint64_t, uint64_t> labels;
 	//using function = std::function<void(VM& vm, const std::vector<Register>&)>;
 	//// ... means vector of registers
 	//// . means 1 register 
@@ -89,12 +97,18 @@ public:
 	void OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
 	void OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
 	void OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& b); 
-	void OpLabel(const VMRegister& a);
-	void OpJump(const VMRegister& a);
-	void OpJumpIfZero(const VMRegister& jump, const VMRegister& a, const VMRegister& b);
-	void OpCall(const std::vector<VMRegister>& args);
+	void OpLabel(const VMRegister& a, size_t ip); // this is diff
+	void OpJump(const VMRegister& jump);
+    
+    void RegisterCPP(const VMRegister& lib);
 
-	VMRegister& GetReg(uint64_t index);
+	// jump to ip or label depending on type
+	void OpJumpIfZero(const VMRegister& jump, const VMRegister& a);
+	void OpJumpIfNotEqual(const VMRegister& jump, const VMRegister& a, const VMRegister& b);
+    
+    void OpCall(const std::vector<VMRegister>& args);
+    void OpCallMove(const VMRegister& dst, const std::vector<VMRegister>& args);
+    VMRegister& GetReg(uint64_t index);
 
 	// returns anything other then type REGISTER
 	VMRegister& GetValueAtReg();

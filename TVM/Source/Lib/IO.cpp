@@ -3,12 +3,9 @@
 
 #include <cassert>
 
-#define REGISTER_LIBFUNC(lib, function, sig)								\
-lib.functions.emplace_back(function, #function, sig, #function " " sig);	\
-
 namespace IO
 {
-	void WriteOut(VM& vm, const std::vector<VMRegister>& args)
+	VMRegister WriteOut(VM& vm, const std::vector<VMRegister>& args)
 	{
 		// first arg is the function
 		VMRegister reg = args[1];
@@ -21,7 +18,7 @@ namespace IO
 			assert(false && "redart");
 			break;
 		case VMRegisterType::STRING:
-			std::cout << reg.value.str;
+            std::cout << reg.value.str;
 			break;
 		case VMRegisterType::FLOAT:
 			std::cout << reg.value.flt;
@@ -32,15 +29,25 @@ namespace IO
 		default:
 			break;
 		}
+        
+        return {};
 	}
 
-	CPPLib GetIOLib()
+    VMRegister Nothing(VM &vm, const std::vector<VMRegister> &args)
+	{
+		VMRegister r;
+		r.type = VMRegisterType::INT;
+		r.value.num = 1234;
+		return r;
+	}
+
+    CPPLib GetIOLib()
 	{
 		CPPLib l;
 		l.name = "io";
-
+		
 		REGISTER_LIBFUNC(l, WriteOut, "...");
-		REGISTER_LIBFUNC(l, Nothing, "int int");
+		REGISTER_LIBFUNC(l, Nothing, "");
 
 		VMRegister pi{};
 		pi.type = VMRegisterType::FLOAT;
@@ -58,7 +65,7 @@ namespace IO
 		{
 			vm.functions[f.function_sig] = f;
 		}
-
-		// #TODO: vars
+        
+        
 	}
 }

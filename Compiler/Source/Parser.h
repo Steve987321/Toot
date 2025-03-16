@@ -7,7 +7,7 @@
 
 inline std::unordered_map<OP_CODE, std::string> op_code_names
 {
-	{OP_CODE::OP_LABEL, "OP_LABEL"},
+	{OP_CODE::OP_DEFINE_LABEL, "OP_DEFINE_LABEL"},
 	{OP_CODE::OP_MOVE, "OP_MOVE"},
 	{OP_CODE::OP_ADD, "OP_ADD"},
 	{OP_CODE::OP_SUBTRACT, "OP_SUBTRACT"},
@@ -17,8 +17,8 @@ inline std::unordered_map<OP_CODE, std::string> op_code_names
 	{OP_CODE::OP_NOT, "OP_NOT"},
 	{OP_CODE::OP_CALL, "OP_CALL"},
 	{OP_CODE::OP_JUMP, "OP_JUMP"},
-	{OP_CODE::OP_JUMPIFNOTZERO, "OP_JUMPIFNOTZERO"},
-	{OP_CODE::OP_JUMPIFZERO, "OP_JUMPIFZERO"},
+    {OP_CODE::OP_JUMP_IF_NOT_EQUAL, "OP_JUMP_IF_NOT_EQUAL"},
+    {OP_CODE::OP_JUMP_IF_EQUAL, "OP_JUMP_IF_EQUAL"},
 	{OP_CODE::OP_RETURN, "OP_RETURN"},
 	{OP_CODE::BYTE_CODE_COUNT, "BYTE_CODE_COUNT"},
 };
