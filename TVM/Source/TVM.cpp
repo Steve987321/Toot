@@ -23,8 +23,26 @@ void VM::Init()
 			OpLabel(i.args[0], loc);
 			break;
 		}
+        
 		loc++;
 	}
+}
+
+const VMRegister* VM::GetValueReg(const VMRegister& reg)
+{
+    if (reg.type == VMRegisterType::REGISTER)
+    {
+        const VMRegister* res = &registers[reg.value.num + relative_register_index];
+        
+        while (res->type == VMRegisterType::REGISTER)
+            res = &registers[reg.value.num + relative_register_index];
+        
+        return res;
+    }
+    else
+    {
+        return &reg;
+    }
 }
 
 void VM::Run()
@@ -54,12 +72,6 @@ void VM::Run()
 		case OP_DIVIDE:
 			assert(i.args.size() == 3);
 			OpDivide(i.args[0], i.args[1], i.args[2]);
-			break;
-		//case OP_NEGATE:
-		//	assert(i.args.size() == 2);
-		//	OpNegate(i.args[0], i.args[1]);
-		//	break;
-		case OP_NOT:
 			break;
 		case OP_CALL:
 			OpCall(i.args);
@@ -105,13 +117,9 @@ void VM::OpMove(const VMRegister& dst, const VMRegister& src)
 
 void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	VMRegister* l = nullptr;
-	VMRegister* r = nullptr;
-	if (a.type == VMRegisterType::REGISTER)
-		l = &registers[a.value.num + relative_register_index];
-	if (b.type == VMRegisterType::REGISTER)
-		r = &registers[b.value.num + relative_register_index];
-
+    const VMRegister* l = GetValueReg(a);
+    const VMRegister* r = GetValueReg(b);
+    
 	assert(l && r);
 
 	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
@@ -136,13 +144,9 @@ void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 
 void VM::OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	VMRegister* l = nullptr;
-	VMRegister* r = nullptr;
-	if (a.type == VMRegisterType::REGISTER)
-		l = &registers[a.value.num + relative_register_index];
-	if (b.type == VMRegisterType::REGISTER)
-		r = &registers[b.value.num + relative_register_index];
-
+    const VMRegister* l = GetValueReg(a);
+    const VMRegister* r = GetValueReg(b);
+    
 	assert(l && r);
 
 	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
@@ -167,17 +171,13 @@ void VM::OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister
 
 void VM::OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	VMRegister* l = nullptr;
-	VMRegister* r = nullptr;
-	if (a.type == VMRegisterType::REGISTER)
-		l = &registers[a.value.num + relative_register_index];
-	if (b.type == VMRegisterType::REGISTER)
-		r = &registers[b.value.num + relative_register_index];
-
+    const VMRegister* l = GetValueReg(a);
+    const VMRegister* r = GetValueReg(b);
+	
 	assert(l && r);
+    assert(dst.type == VMRegisterType::REGISTER);
 
 	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
-	//*dst_reg = *l;
 
 	switch (l->type)
 	{
@@ -196,13 +196,9 @@ void VM::OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister
 
 void VM::OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
 {
-	VMRegister* l = nullptr;
-	VMRegister* r = nullptr;
-	if (a.type == VMRegisterType::REGISTER)
-		l = &registers[a.value.num + relative_register_index];
-	if (b.type == VMRegisterType::REGISTER)
-		r = &registers[b.value.num + relative_register_index];
-
+    const VMRegister* l = GetValueReg(a);
+    const VMRegister* r = GetValueReg(b);
+    
 	assert(l && r);
 
 	VMRegister* dst_reg = &registers[dst.value.num + relative_register_index];
@@ -270,11 +266,6 @@ VMRegister& VM::GetReg(uint64_t index)
 
 	return registers[index + relative_register_index];
 }
-
-//Register& VM::GetValueAtReg()
-//{
-//
-//}
 
 void VM::OpJump(const VMRegister& a)
 {

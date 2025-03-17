@@ -18,7 +18,6 @@ enum OP_CODE
 	OP_SUBTRACT,
 	OP_MULTIPLY,
 	OP_DIVIDE,
-	OP_NEGATE,
 	OP_NOT,
 	OP_CALL,
     OP_CALL_MOVE, // first arg is destination rest is function args
@@ -60,6 +59,7 @@ struct VMRegister
 	VMRegisterType type; // zero initialized to INVALID
 };
 
+// slow because it checks alot but later when parser is done it shouldn't be needed anymore
 class VM
 {
 public:
@@ -91,12 +91,15 @@ public:
 	void Init();
 
 	void Run();
+    
+    // returns non register type 
+    const VMRegister* GetValueReg(const VMRegister& reg);
 
 	void OpMove(const VMRegister& dst, const VMRegister& src);
 	void OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
 	void OpSubtract(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
 	void OpMultiply(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
-	void OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& b); 
+	void OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
 	void OpLabel(const VMRegister& a, size_t ip); // this is diff
 	void OpJump(const VMRegister& jump);
     

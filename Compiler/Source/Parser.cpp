@@ -6,6 +6,8 @@
 #include <format>
 #include <stack>
 
+#include "Compiler.h"
+
 namespace Compiler
 {
 	
@@ -98,8 +100,8 @@ static void PrintInstruction(OP_CODE op_code, std::vector<VMRegister> args = {},
 		}
 		s += ' ';
 	}
-
-	std::cout << s << std::endl;
+    
+    std::cout << s << std::endl;
 }
 
 static void AddInstruction(OP_CODE op_code, std::vector<VMRegister> args = {}, VMRegister reserved = {0, VMRegisterType::INVALID})
@@ -196,121 +198,101 @@ static void BeginInnerScope()
 
 static bool GetFunctionArgs(const std::string& func_name, std::vector<VMRegister>& args_as_registers, std::string& sig)
 {
-    std::string arg_list;
+    if (!token || token->type != TOKEN_TYPE::PARENTHESES_LEFT)
+        return false;
+    
+    IncrementToken();
+    
     sig.clear();
     
 	for (size_t i = pos; i < current_tokens.size(); i++)
 	{
 		Token& t = current_tokens[i];
+        
+        if(t.type == TOKEN_TYPE::COMMA)
+            continue;
+        
+        // end of args
+        if (t.type == TOKEN_TYPE::PARENTHESES_RIGHT)
+        {
+            pos = i;
 
-		if (t.type == TOKEN_TYPE::IDENTIFIER)
-		{
-			VMRegister* reg = GetVarRegister(t.str);
+            sig = func_name;
+            sig += ' ';
+            sig += RegsToTypes(args_as_registers);
 
-			// #TODO VALIDATE FOR NUM VALUEs
-			if (reg)
-			{
-				pos = i;
-				token = &current_tokens[i];
-				// numerical
-				VMRegister arg = PlusMinus();
+            Token* next = PeekNextToken();
+            if (!next)
+            {
+                AddError("Expected token at:");
+                return false;
+            }
 
-				// check if -1 and in that case it probably ended the expression
-				if (arg.value.num != -1)
-				{
-					assert(arg.type == VMRegisterType::REGISTER);
-					args_as_registers.emplace_back(arg);
-					i = pos;
-				}
-			}
-		}
+            // check if definition
+            if (next->type == TOKEN_TYPE::BRACKET_LEFT)
+            {
+                // if (store_return)
+                // {
+                //     AddError("Can't assign to function definition");
+                //     return;
+                // }
 
-		if (t.type == TOKEN_TYPE::NUMBER)
-		{
-			pos = i;
-			token = &current_tokens[i];
-			// numerical
-			VMRegister arg = PlusMinus();
+                auto [stored_sig, _] = function_sigs.emplace(sig);
+                VMRegister func{};
+                func.type = VMRegisterType::STRING;
+                func.value.str = stored_sig->c_str();
 
-			// check if -1 and in that case it probably ended the expression
-			if (arg.value.num != -1)
-			{
-				assert(arg.type == VMRegisterType::REGISTER);
-				args_as_registers.emplace_back(arg);
-				i = pos;
-			}
-		}
+                AddInstruction(OP_DEFINE_LABEL, {func});
 
-		arg_list += t.str;
+                while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
+                    Expression();
 
+                AddInstruction(OP_RETURN);
+            }
+            else if (next->type == TOKEN_TYPE::SEMICOLON)
+            {
+                // check if there exists a signature that takes these argument types
+                if (!function_sigs.contains(sig))
+                {
+                    // check if there exists a signature that takes all types
+                    std::string func_name = sig.substr(0, sig.find(' '));
+                    if (function_sigs.contains(func_name + " ..."))
+                        sig = func_name + " ...";
+                    else
+                    {
+                        // cooked
+                        AddError("No function found with signature %s", sig.c_str());
+                        return false;
+                    }
+                }
+
+                // if (store_return)
+                // {
+                    
+                // }
+            
+                break;
+            }
+        }
+        
+        pos = i;
+        token = &t;
+        VMRegister arg = PlusMinus();
+
+        if (arg.value.num != -1)
+        {
+            assert(arg.type == VMRegisterType::REGISTER);
+            args_as_registers.emplace_back(arg);
+            i = pos;
+        }
+                
 		//Register* arg_reg = GetVarRegister(t.str);
 		//if (arg_reg)
 		//{
 		//	args_as_registers.emplace_back(*arg_reg);
 		//}
 	
-		// end of args 
-		if (t.type == TOKEN_TYPE::PARENTHESES_RIGHT)
-		{
-			pos = i;
-
-			sig = func_name;
-			sig += ' ';
-			sig += RegsToTypes(args_as_registers);
-
-			Token* next = PeekNextToken();
-			if (!next)
-			{
-				AddError("Expected token at:");
-				return false;
-			}
-
-			// check if definition
-			if (next->type == TOKEN_TYPE::BRACKET_LEFT)
-			{
-				// if (store_return)
-				// {
-				// 	AddError("Can't assign to function definition");
-				// 	return;
-				// }
-
-				auto [stored_sig, _] = function_sigs.emplace(sig);
-				VMRegister func{};
-				func.type = VMRegisterType::STRING;
-				func.value.str = stored_sig->c_str();
-
-				AddInstruction(OP_DEFINE_LABEL, {func});
-
-				while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
-					Expression();
-
-				AddInstruction(OP_RETURN);
-			}
-			else if (next->type == TOKEN_TYPE::SEMICOLON)
-			{
-				// check if there exists a signature that takes these argument types 
-				if (!function_sigs.contains(sig))
-				{
-					// check if there exists a signature that takes all types 
-					std::string func_name = sig.substr(0, sig.find(' '));
-					if (function_sigs.contains(func_name + " ..."))
-						sig = func_name + " ...";
-					else
-					{
-						// cooked 
-						AddError("No function found with signature %s", sig.c_str());
-						return false;
-					}
-				}
-
-				// if (store_return)
-				// {
-					
-				// }
-			
-				break;
-			}
-		}
+		
 	}
 
 	return true;
@@ -344,7 +326,8 @@ static VMRegister Unary()
 {
 	VMRegister res {};
 	res.type = VMRegisterType::INT;
-	res.value.num = -1;
+	res.value.num = -1; // burr use invalid type
+//    res.type = VMRegisterType::INVALID;
 
 	const bool is_unary_min = token->type == TOKEN_TYPE::MINUS;
 	const bool is_not = token->type == TOKEN_TYPE::NOT;
@@ -361,17 +344,22 @@ static VMRegister Unary()
 		{
 			if (is_unary_min || is_not)
 			{
-				VMRegister dst = CreateRegisterDst(register_pos);
-				res.value.num = register_pos;
-				register_pos++;
-
-				if (is_unary_min)
-					AddInstruction(OP_NEGATE, { res });
-				else if (is_not)
-					AddInstruction(OP_NOT, { res });
-
-				AddInstruction(OP_MOVE, { dst, res });
-			}
+                VMRegister dst = CreateRegisterDst(register_pos);
+                register_pos++;
+                                
+                if (is_unary_min)
+                {
+                    VMRegister min_one_reg;
+                    min_one_reg.value.num = -1;
+                    min_one_reg.type = VMRegisterType::INT;
+                    
+                    AddInstruction(OP_MULTIPLY, { dst, res, min_one_reg});
+                }
+                else
+                {
+                    AddInstruction(OP_MOVE, {dst, res});
+                }
+            }
 
 			return res;
 		}
@@ -408,12 +396,21 @@ static VMRegister Unary()
 		}
 		else
 		{
-			res.value.num = reg->value.num;
-			//register_pos++;
-			//AddInstruction(OP_MOVE, { res, *reg });
-
 			if (is_unary_min)
-				AddInstruction(OP_NEGATE, { res });
+            {
+                res = CreateRegisterDst(register_pos);
+                register_pos++;
+          
+                VMRegister min_one_reg;
+                min_one_reg.value.num = -1;
+                min_one_reg.type = VMRegisterType::INT;
+
+                AddInstruction(OP_MULTIPLY, { res, *reg, min_one_reg});
+                
+                return res;
+            }
+            
+            return *reg;
 		}
 	}
 	else if (token->type == TOKEN_TYPE::NUMBER)
@@ -812,41 +809,7 @@ static void IntKeyword()
 
 		IncrementToken();
 
-		VMRegister dst{};
-		dst.type = VMRegisterType::REGISTER;
-		dst.value.num = (int32_t)register_pos;
-
-		if (token->type == TOKEN_TYPE::IDENTIFIER)
-		{
-			// get register index
-			VMRegister* reg = GetVarRegister(token->str);
-			if (reg)
-			{
-				dst.value = reg->value;
-				dst.type = VMRegisterType::REGISTER;
-			}
-			else
-			{
-                Token* next = PeekNextToken();
-                if (!next || next->type != TOKEN_TYPE::PARENTHESES_LEFT)
-                {
-                    AddError("Undefined identifier: %s", id_res.value.str);
-                    return;
-                }
-			}
-
-			dst = PlusMinus();
-		}
-		else if (token->type == TOKEN_TYPE::NUMBER)
-		{
-			// get value 
-			dst = PlusMinus();
-		}
-		else
-		{
-			AddError("Unexpected token after assignment at: ");
-			return;
-		}
+		VMRegister dst = PlusMinus();
 
 		vars.back().emplace(id_res.value.str, dst);
 
@@ -942,9 +905,13 @@ void AddLibToParserCtx(const CPPLib& lib)
 bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res)
 {
 	// recursive des$0.01
-	
+    register_pos = 0;
+    
+    vars.clear();
+    function_sigs.clear();
 	parse_res.clear();
 	errors.clear();
+    
 	current_tokens = tokens;
 
 	if (current_tokens.empty())
@@ -964,8 +931,7 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 
 	op_codes_res = parse_res;
 
-	for (const std::string& err : errors)
-		std::cout << err << std::endl;
+    error_msgs.insert(error_msgs.begin(), errors.begin(), errors.end());
 
 	return errors.empty();
 }

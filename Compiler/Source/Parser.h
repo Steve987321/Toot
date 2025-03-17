@@ -13,7 +13,6 @@ inline std::unordered_map<OP_CODE, std::string> op_code_names
 	{OP_CODE::OP_SUBTRACT, "OP_SUBTRACT"},
 	{OP_CODE::OP_MULTIPLY, "OP_MULTIPLY"},
 	{OP_CODE::OP_DIVIDE, "OP_DIVIDE"},
-	{OP_CODE::OP_NEGATE, "OP_NEGATE"},
 	{OP_CODE::OP_NOT, "OP_NOT"},
 	{OP_CODE::OP_CALL, "OP_CALL"},
 	{OP_CODE::OP_JUMP, "OP_JUMP"},

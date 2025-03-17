@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string_view>
+#include <vector>
+#include <string>
 
 namespace Compiler
 {
@@ -10,5 +11,6 @@ namespace Compiler
 		ERR
 	};
 
+    inline std::vector<std::string> error_msgs;
 	CompileResult CompileString(std::string_view str);
 }

@@ -166,7 +166,7 @@ namespace Compiler
 
 					return true;
 				}
-				else if (source[i] == ';' || source[i] == '(' || source[i] == ')')
+				else if (source[i] == ',' || source[i] == ';' || source[i] == '(' || source[i] == ')')
 				{
 					token.str = source.substr(pos, i - pos);
 					token.type = TOKEN_TYPE::IDENTIFIER;
@@ -237,6 +237,9 @@ namespace Compiler
             break;
         case '}':
             res.type = TOKEN_TYPE::BRACKET_RIGHT;
+            break;
+        case ',':
+            res.type = TOKEN_TYPE::COMMA;
             break;
 		case '=':
 			res.type = TOKEN_TYPE::ASSIGNMENT;
@@ -309,8 +312,9 @@ namespace Compiler
             
 			Token token = GetToken(c);
 			tokens.emplace_back(token);
+            
 			std::cout << token.str << ' ' << (int)token.type << std::endl;
-
+            
 			if (token.type == TOKEN_TYPE::ERROR)
 				return false;
 
