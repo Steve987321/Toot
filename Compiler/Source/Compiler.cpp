@@ -9,7 +9,7 @@
 namespace Compiler
 {
 
-	CompileResult CompileString(std::string_view str)
+    CompileResult CompileString(std::string_view str, std::vector<VM::Instruction>& res)
 	{
         error_msgs.clear();
         
@@ -21,24 +21,9 @@ namespace Compiler
 			return CompileResult::ERR;
 
 		// to vm bytecodes
+		if (!Parse(tokens, res))
+            return CompileResult::ERR;
         
-		std::vector<VM::Instruction> res;
-
-		//PreProcess(tokens);
-
-		Parse(tokens, res);
-
-		// tEMP  
-		VM vm;
-		vm.instructions = res;
-		vm.Init();
-		vm.Run();
-        
-        for (const std::string& err : error_msgs)
-        {
-            std::cout << err << std::endl; 
-        }
-
 		return CompileResult::NONE;
 	}
 

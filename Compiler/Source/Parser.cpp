@@ -433,6 +433,19 @@ static VMRegister Unary()
 	}
 	else if (token->type == TOKEN_TYPE::FLOAT)
 	{
+        res.type = VMRegisterType::REGISTER;
+        float val = std::stof(token->str);
+
+        if (is_unary_min)
+            val = -val;
+
+        VMRegister src{};
+        src.type = VMRegisterType::FLOAT;
+        src.value.flt = val;
+
+        res.value.num = register_pos;
+        register_pos++;
+        AddInstruction(OP_MOVE, { res, src });
 	}
 
 	return res;
@@ -741,6 +754,12 @@ static VMRegister IfStatement()
 			// go to the end if it evaluates to false 
 			AddInstruction(OP_CODE::OP_JUMP_IF_NOT_EQUAL, {if_end, a, b});
 		}
+        else if (comp_type.type == TOKEN_TYPE::NOT_EQUAL)
+        {
+            // !=
+            // go to the end if it evaluates to false
+            AddInstruction(OP_CODE::OP_JUMP_IF_EQUAL, {if_end, a, b});
+        }
 		
 		// define branches 
 //		AddInstruction(OP_DEFINE_LABEL, {if_branch});
@@ -772,7 +791,7 @@ static VMRegister IfStatement()
 	return {};
 }
 
-static void IntKeyword()
+static void NumberKeyword(TOKEN_TYPE type)
 {
 	// check next token, should be identifier
 	IncrementToken();
@@ -790,47 +809,40 @@ static void IntKeyword()
 	}
 
 	VMRegister id_res = Identifier();
-	
-	if (id_res.type == VMRegisterType::FUNCTION)
-	{
-		// setup args and jmp
-		//AddInstruction();
-	}
-	else
-	{
-		VMRegister src{};
-		src.type = VMRegisterType::INT;
 
-		if (token->type != TOKEN_TYPE::ASSIGNMENT)
-		{
-			AddError("Unexpected token after int at: {}", pos);
-			return;
-		}
+    VMRegister src{};
+    
+    if (type == TOKEN_TYPE::INT)
+        src.type = VMRegisterType::INT;
+    else if (type == TOKEN_TYPE::FLOAT)
+        src.type = VMRegisterType::FLOAT;
+    
+    if (token->type != TOKEN_TYPE::ASSIGNMENT)
+    {
+        AddError("Unexpected token after int at: {}", pos);
+        return;
+    }
 
-		IncrementToken();
+    IncrementToken();
 
-		VMRegister dst = PlusMinus();
+    VMRegister dst = PlusMinus();
 
-		vars.back().emplace(id_res.value.str, dst);
+    vars.back().emplace(id_res.value.str, dst);
 
-		IncrementToken();
+    IncrementToken();
 
-		if (!token)
-		{
-			AddError("Expected token after int at: %d", pos);
-			return;
-		}
-		if (token->type != TOKEN_TYPE::SEMICOLON)
-		{
-			AddError("Unexpected token: %s. After int at: %d", token->str.c_str(), pos);
-			return;
-		}
+    if (!token)
+    {
+        AddError("Expected token after int at: %d", pos);
+        return;
+    }
+    if (token->type != TOKEN_TYPE::SEMICOLON)
+    {
+        AddError("Unexpected token: %s. After int at: %d", token->str.c_str(), pos);
+        return;
+    }
 
-		//AddInstruction(OP_CODE::OP_MOVE, { dst, src });
-		//register_pos++;
-
-		IncrementToken();
-	}
+    IncrementToken();
 }
 
 VMRegister Expression()
@@ -844,8 +856,11 @@ VMRegister Expression()
 		case TOKEN_TYPE::STRING_LITERAL:
 			break;
 		case TOKEN_TYPE::INT:
-			IntKeyword();
+			NumberKeyword(TOKEN_TYPE::INT);
 			break;
+        case TOKEN_TYPE::FLOAT:
+            NumberKeyword(token->type);
+            break;
 		case TOKEN_TYPE::IF:
 			IfStatement();
 			break;

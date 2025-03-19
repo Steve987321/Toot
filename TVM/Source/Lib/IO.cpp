@@ -47,7 +47,7 @@ namespace IO
 		l.name = "io";
 		
 		REGISTER_LIBFUNC(l, WriteOut, "...");
-		REGISTER_LIBFUNC(l, Nothing, "registerregister");
+		REGISTER_LIBFUNC(l, Nothing, "");
 
 		VMRegister pi{};
 		pi.type = VMRegisterType::FLOAT;

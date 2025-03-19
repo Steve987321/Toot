@@ -1,10 +1,13 @@
 #include "Compiler.h"
+#include "TVM.h"
 
 const char* source =
 R"(
 	// string s = "stringa"; // X
-	int a = -5;
-    Nothing(a,-a);
+    float f = 0.15;
+    Nothing();
+	//int a = -5;
+    //Nothing(a,-a);
 	
 	// WriteOut(f"c = {c}"); // Test the format string 
 	// WriteOut(c); 
@@ -16,5 +19,21 @@ R"(
 #include <iostream>
 int main()
 {
-	Compiler::CompileString(source);
+    std::vector<VM::Instruction> byte_codes;
+    
+    if (Compiler::CompileString(source, byte_codes) != Compiler::CompileResult::ERR)
+    {
+        VM vm;
+        IO::RegisterToVM(vm);
+
+        vm.instructions = byte_codes;
+        vm.Init();
+        vm.Run();
+    }
+    
+    for (const std::string& err : Compiler::error_msgs)
+    {
+        std::cout << err << std::endl;
+    }
+
 }
