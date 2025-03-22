@@ -17,8 +17,6 @@ namespace Compiler
 		{"int", TOKEN_TYPE::INT},
 		{"float", TOKEN_TYPE::FLOAT},
 		{"for", TOKEN_TYPE::FOR},
-		{"true", TOKEN_TYPE::TRUE},
-		{"false", TOKEN_TYPE::FALSE},
 	};
 
 	static bool GetNextChar(char& c)
@@ -146,7 +144,7 @@ namespace Compiler
 		}
 
 		if (floating_point)
-			token.type = TOKEN_TYPE::FLOAT;
+            token.type = TOKEN_TYPE::DECIMAL_NUMBER;
 		else
 			token.type = TOKEN_TYPE::NUMBER;
 	}
@@ -280,11 +278,6 @@ namespace Compiler
 		}
         
 		return res;
-	}
-
-	bool TokenIsDigit(const Token& t)
-	{
-		return t.type == TOKEN_TYPE::FLOAT || t.type == TOKEN_TYPE::INT;
 	}
 
 	void LexerInit(std::string_view src)

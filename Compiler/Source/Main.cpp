@@ -4,8 +4,26 @@
 const char* source =
 R"(
 	// string s = "stringa"; // X
-    float f = 0.15;
-    Nothing();
+    float f = 0.1;
+    if (f == 0.15)
+    {
+        f = 0.0;
+        WriteOut(f);
+    }
+    else 
+    {
+        f = 1.05;
+        WriteOut(f);
+    }
+    if (f == 1.0)
+    {
+        f = 100.0;
+        WriteOut(f);
+    }
+
+    WriteOut(f);
+
+    // Nothing();
 	//int a = -5;
     //Nothing(a,-a);
 	

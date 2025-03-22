@@ -169,9 +169,14 @@ static Token* PeekPreviousToken(int steps = 1)
 	return res;
 }
 
-static bool IsTokenKeyword(Token& token)
+static bool IsTokenKeyword(const Token& token)
 {
 	return token.type == TOKEN_TYPE::INT || token.type == TOKEN_TYPE::FLOAT /*|| token.type == TOKEN_TYPE::STRING*/;
+}
+
+static bool IsTokenNumerical(const Token& token)
+{
+    return token.type == TOKEN_TYPE::DECIMAL_NUMBER || token.type == TOKEN_TYPE::NUMBER;
 }
 
 static bool IsTokenOperatorAssign(Token& token)
@@ -431,7 +436,7 @@ static VMRegister Unary()
 
 		return res;
 	}
-	else if (token->type == TOKEN_TYPE::FLOAT)
+	else if (token->type == TOKEN_TYPE::DECIMAL_NUMBER)
 	{
         res.type = VMRegisterType::REGISTER;
         float val = std::stof(token->str);
@@ -650,7 +655,7 @@ static VMRegister IfStatement()
 		}
 		else
 		{
-			AddError("after '(' Unexpected token: {}", token->str.c_str());
+			AddError("after '(' Unexpected token: '%s'", token->str.c_str());
 			return {};
 		}
 
@@ -662,7 +667,8 @@ static VMRegister IfStatement()
 		}
 
 		Token& comp_type = *token;
-
+        // check if it is a comparison type 
+        
 		// get second argument
 		IncrementToken();
 
@@ -671,7 +677,7 @@ static VMRegister IfStatement()
 			AddError("unexpected end");
 			return {};
 		}
-		if (token->type == TOKEN_TYPE::NUMBER)
+        if (IsTokenNumerical(*token))
 		{
 			b = PlusMinus();
 		}
@@ -681,7 +687,7 @@ static VMRegister IfStatement()
 		}
 		else
 		{
-			AddError("after '{}' unexpected token: {}", comp_type.str.c_str(), token->str.c_str());
+			AddError("after '%s' unexpected token: '%s'", comp_type.str.c_str(), token->str.c_str());
 			return {};
 		}
 		
@@ -714,7 +720,7 @@ static VMRegister IfStatement()
 
 		bool end = false;
 		bool has_else = false; 
-		// check for end and check for else or else if's 
+		// check for end and check for else
 		for (size_t i = pos; i < current_tokens.size(); i++)
 		{
 			const Token* t = &current_tokens[i];
@@ -747,18 +753,32 @@ static VMRegister IfStatement()
 		if (has_else)
 			if_else = CreateUniqueLabelRegister();
 		
-		// check comparison type 
+		// check comparison type
 		if (comp_type.type == TOKEN_TYPE::COMPARISON)
 		{
 			// == 
-			// go to the end if it evaluates to false 
-			AddInstruction(OP_CODE::OP_JUMP_IF_NOT_EQUAL, {if_end, a, b});
+			// go to the end if it evaluates to false
+            
+            VMRegister dst;
+            if (has_else)
+                dst = if_else;
+            else
+                dst = if_end;
+            
+			AddInstruction(OP_CODE::OP_JUMP_IF_NOT_EQUAL, {dst, a, b});
 		}
         else if (comp_type.type == TOKEN_TYPE::NOT_EQUAL)
         {
             // !=
             // go to the end if it evaluates to false
-            AddInstruction(OP_CODE::OP_JUMP_IF_EQUAL, {if_end, a, b});
+            
+            VMRegister dst;
+            if (has_else)
+                dst = if_else;
+            else
+                dst = if_end;
+            
+            AddInstruction(OP_CODE::OP_JUMP_IF_EQUAL, {dst, a, b});
         }
 		
 		// define branches 
@@ -772,13 +792,17 @@ static VMRegister IfStatement()
         }
         else
         {
-            AddError("Expected closing bracket '}'");
+            AddError("Expected closing bracket '}' for if statement");
             return {};
         }
         
 		// #todo can use has_else instead of checking again
         if (token && token->type == TOKEN_TYPE::ELSE)
         {
+            // skip to end for if branch
+            AddInstruction(OP_JUMP, {if_end});
+            
+            // else branch label
             AddInstruction(OP_DEFINE_LABEL, {if_else});
             
             IncrementToken();
@@ -856,7 +880,7 @@ VMRegister Expression()
 		case TOKEN_TYPE::STRING_LITERAL:
 			break;
 		case TOKEN_TYPE::INT:
-			NumberKeyword(TOKEN_TYPE::INT);
+			NumberKeyword(token->type);
 			break;
         case TOKEN_TYPE::FLOAT:
             NumberKeyword(token->type);
@@ -930,7 +954,7 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 	current_tokens = tokens;
 
 	if (current_tokens.empty())
-		return false; // https://www.youtube.com/watch?v=Unzc731iCUY
+		return false;
 
 	pos = 0;
 	token = &current_tokens[0];

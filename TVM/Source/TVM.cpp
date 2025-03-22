@@ -18,7 +18,6 @@ void VM::Init()
 			// add to functions or if just label add to somethign eles
 			assert(i.args.size() == 1);
 			OpLabel(i.args[0], loc);
-			break;
 		}
         
 		loc++;
@@ -54,6 +53,8 @@ void VM::Run()
 			assert(i.args.size() == 2);
 			OpMove(i.args[0], i.args[1]);
 			break;
+//        case OP_MOVE_ONCE:
+//            break;
 		case OP_ADD:
 			assert(i.args.size() == 3);
 			OpAdd(i.args[0], i.args[1], i.args[2]);
