@@ -29,6 +29,7 @@ namespace IO
 		default:
 			break;
 		}
+        std::cout << std::endl;
         
         return {};
 	}

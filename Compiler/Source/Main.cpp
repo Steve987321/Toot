@@ -5,8 +5,11 @@ const char* source =
 R"(
 	// string s = "stringa"; // X
     once float f = 0.0;
-    f = f + 1.0;
-    WriteOut(f);
+
+    if (f > 0.2)
+    {
+        WriteOut(f);
+    }
 
     // Nothing();
 	//int a = -5;
@@ -31,8 +34,6 @@ int main()
 
         vm.instructions = byte_codes;
         vm.Init();
-        vm.Run();
-        vm.instruction_pointer =0;
         vm.Run();
     }
     

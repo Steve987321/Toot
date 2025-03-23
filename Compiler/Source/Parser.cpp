@@ -753,41 +753,43 @@ static VMRegister IfStatement()
 		}
 
 		// branch destinations 
-//		VMRegister if_branch = CreateUniqueLabelRegister();
 		VMRegister if_end = CreateUniqueLabelRegister();
 		VMRegister if_else = {};
 		if (has_else)
 			if_else = CreateUniqueLabelRegister();
 		
-		// check comparison type
-		if (comp_type.type == TOKEN_TYPE::COMPARISON)
-		{
-			// == 
-			// go to the end if it evaluates to false
-            
-            VMRegister dst;
-            if (has_else)
-                dst = if_else;
-            else
-                dst = if_end;
-            
-			AddInstruction(OP_CODE::OP_JUMP_IF_NOT_EQUAL, {dst, a, b});
-		}
-        else if (comp_type.type == TOKEN_TYPE::NOT_EQUAL)
+        // go to the end if it evaluates to false
+        VMRegister comparison_dst;
+        if (has_else)
+            comparison_dst = if_else;
+        else
+            comparison_dst = if_end;
+
+        // check comparison type
+        switch(comp_type.type)
         {
-            // !=
-            // go to the end if it evaluates to false
-            
-            VMRegister dst;
-            if (has_else)
-                dst = if_else;
-            else
-                dst = if_end;
-            
-            AddInstruction(OP_CODE::OP_JUMP_IF_EQUAL, {dst, a, b});
+            case TOKEN_TYPE::COMPARISON:
+                // ==
+                AddInstruction(OP_CODE::OP_JUMP_IF_NOT_EQUAL, {comparison_dst, a, b});
+                break;
+            case TOKEN_TYPE::NOT_EQUAL:
+                // !=
+                AddInstruction(OP_CODE::OP_JUMP_IF_EQUAL, {comparison_dst, a, b});
+                break;
+            case TOKEN_TYPE::LESS:
+                // <
+                AddInstruction(OP_CODE::OP_JUMP_IF_GREATER, {comparison_dst, a, b});
+                break;
+            case TOKEN_TYPE::GREATER:
+                // >
+                AddInstruction(OP_CODE::OP_JUMP_IF_LESS, {comparison_dst, a, b});
+                break;
+            default:
+                AddError("Invalid comparison token");
+                break;
         }
-		
-		// define branches 
+        
+		// define branches
 //		AddInstruction(OP_DEFINE_LABEL, {if_branch});
 		
         BeginInnerScope();

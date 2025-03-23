@@ -231,7 +231,6 @@ namespace Compiler
 			AdvanceUnfinishedToken(res, '"');
 			res.type = TOKEN_TYPE::STRING_LITERAL;
 			break;
-			// nuh
 		case '(':
 			res.type = TOKEN_TYPE::PARENTHESES_LEFT;
 			break;	
@@ -251,6 +250,20 @@ namespace Compiler
 			res.type = TOKEN_TYPE::ASSIGNMENT;
 			CheckFinishToken(res, '=', TOKEN_TYPE::COMPARISON);
 			break;
+        case '<':
+            res.type = TOKEN_TYPE::LESS;
+            break;
+        case '>':
+            res.type = TOKEN_TYPE::GREATER;
+            break;
+        case '&':
+            res.type = TOKEN_TYPE::BITWISE_AND;
+            CheckFinishToken(res, '&', TOKEN_TYPE::AND);
+            break;
+        case '|':
+            res.type = TOKEN_TYPE::BITWISE_OR;
+            CheckFinishToken(res, '|', TOKEN_TYPE::OR);
+            break;
 		case '!':
 			res.type = TOKEN_TYPE::NOT;
 			CheckFinishToken(res, '=', TOKEN_TYPE::NOT_EQUAL);

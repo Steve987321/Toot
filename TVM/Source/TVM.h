@@ -26,6 +26,8 @@ enum OP_CODE
 	OP_JUMP,
 	OP_JUMP_IF_NOT_EQUAL,
 	OP_JUMP_IF_EQUAL,
+    OP_JUMP_IF_LESS,
+    OP_JUMP_IF_GREATER,
 	//OP_SETRELREGINDEX, // for the vm to handle
 	OP_RETURN,
 	BYTE_CODE_COUNT,
@@ -108,11 +110,11 @@ public:
 //    void OpJumpOnce(const VMRegister& jump);
     void OpReturn();
     
-    void RegisterCPP(const VMRegister& lib);
-
 	// jump to ip or label depending on type
 	void OpJumpIfNotEqual(const VMRegister& jump, const VMRegister& a, const VMRegister& b);
     void OpJumpIfEqual(const VMRegister& jump, const VMRegister& a, const VMRegister& b);
+    void OpJumpIfLess(const VMRegister& jump, const VMRegister& a, const VMRegister& b);
+    void OpJumpIfGreater(const VMRegister& jump, const VMRegister& a, const VMRegister& b);
     
     void OpCall(const std::vector<VMRegister>& args);
     void OpCallMove(const VMRegister& dst, const std::vector<VMRegister>& args);

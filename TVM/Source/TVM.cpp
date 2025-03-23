@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 
+
 void VM::Init()
 {
 	rel_reg_stack.push(0);
@@ -56,7 +57,7 @@ void VM::Run()
         case OP_MOVE_ONCE:
             assert(i.args.size() == 2);
             OpMoveOnce(i.args[0], i.args[1]);
-                break;
+            break;
 		case OP_ADD:
 			assert(i.args.size() == 3);
 			OpAdd(i.args[0], i.args[1], i.args[2]);
@@ -87,7 +88,19 @@ void VM::Run()
             assert(i.args.size() == 3);
             OpJumpIfNotEqual(i.args[0], i.args[1], i.args[2]);
             break;
-		case OP_RETURN:
+        case OP_JUMP_IF_EQUAL:
+            assert(i.args.size() == 3);
+            OpJumpIfEqual(i.args[0], i.args[1], i.args[2]);
+            break;
+        case OP_JUMP_IF_GREATER:
+            assert(i.args.size() == 3);
+            OpJumpIfGreater(i.args[0], i.args[1], i.args[2]);
+            break;
+        case OP_JUMP_IF_LESS:
+            assert(i.args.size() == 3);
+            OpJumpIfLess(i.args[0], i.args[1], i.args[2]);
+            break;
+        case OP_RETURN:
 			break;
 		default: 
 			break;
@@ -336,6 +349,58 @@ void VM::OpJumpIfEqual(const VMRegister& jump, const VMRegister& a, const VMRegi
             break;
         case VMRegisterType::FLOAT:
             v = l->value.flt == r->value.flt;
+            break;
+        default:
+            break;
+    }
+
+    if (v)
+    {
+        instruction_pointer = labels.find(jump.value.num)->second;
+    }
+}
+
+void VM::OpJumpIfLess(const VMRegister& jump, const VMRegister& a, const VMRegister& b)
+{
+    bool v = false;
+    const VMRegister* l = GetValueReg(registers[a.value.num]);
+    const VMRegister* r = GetValueReg(registers[b.value.num]);
+    
+    assert(l && r);
+    
+    switch(l->type)
+    {
+        case VMRegisterType::INT:
+            v = l->value.num < r->value.num;
+            break;
+        case VMRegisterType::FLOAT:
+            v = l->value.flt < r->value.flt;
+            break;
+        default:
+            break;
+    }
+
+    if (v)
+    {
+        instruction_pointer = labels.find(jump.value.num)->second;
+    }
+}
+
+void VM::OpJumpIfGreater(const VMRegister& jump, const VMRegister& a, const VMRegister& b)
+{
+    bool v = false;
+    const VMRegister* l = GetValueReg(registers[a.value.num]);
+    const VMRegister* r = GetValueReg(registers[b.value.num]);
+    
+    assert(l && r);
+    
+    switch(l->type)
+    {
+        case VMRegisterType::INT:
+            v = l->value.num > r->value.num;
+            break;
+        case VMRegisterType::FLOAT:
+            v = l->value.flt > r->value.flt;
             break;
         default:
             break;
