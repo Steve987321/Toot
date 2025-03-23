@@ -145,7 +145,7 @@ void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
         break;
     case VMRegisterType::FLOAT:
         dst_reg->type = VMRegisterType::FLOAT;
-        dst_reg->value.flt = l->value.num + r->value.flt;
+        dst_reg->value.flt = l->value.flt + r->value.flt;
         break;
     case VMRegisterType::INT:
         dst_reg->type = VMRegisterType::INT;
