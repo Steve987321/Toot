@@ -8,7 +8,8 @@
 inline std::unordered_map<OP_CODE, std::string> op_code_names
 {
 	{OP_CODE::OP_DEFINE_LABEL, "OP_DEFINE_LABEL"},
-	{OP_CODE::OP_MOVE, "OP_MOVE"},
+    {OP_CODE::OP_MOVE, "OP_MOVE"},
+    {OP_CODE::OP_MOVE_ONCE, "OP_MOVE_ONCE"},
 	{OP_CODE::OP_ADD, "OP_ADD"},
 	{OP_CODE::OP_SUBTRACT, "OP_SUBTRACT"},
 	{OP_CODE::OP_MULTIPLY, "OP_MULTIPLY"},

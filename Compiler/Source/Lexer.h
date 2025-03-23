@@ -13,6 +13,7 @@ namespace Compiler
 		NUMBER,
         DECIMAL_NUMBER,
 		COMMA,
+        ONCE,
 		INT,
 		FLOAT,
 		IF,

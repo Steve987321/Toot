@@ -4,23 +4,8 @@
 const char* source =
 R"(
 	// string s = "stringa"; // X
-    float f = 0.1;
-    if (f == 0.15)
-    {
-        f = 0.0;
-        WriteOut(f);
-    }
-    else 
-    {
-        f = 1.05;
-        WriteOut(f);
-    }
-    if (f == 1.0)
-    {
-        f = 100.0;
-        WriteOut(f);
-    }
-
+    once float f = 0.0;
+    f = f + 1.0;
     WriteOut(f);
 
     // Nothing();
@@ -46,6 +31,8 @@ int main()
 
         vm.instructions = byte_codes;
         vm.Init();
+        vm.Run();
+        vm.instruction_pointer =0;
         vm.Run();
     }
     

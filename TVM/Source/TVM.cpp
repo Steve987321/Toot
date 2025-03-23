@@ -53,8 +53,10 @@ void VM::Run()
 			assert(i.args.size() == 2);
 			OpMove(i.args[0], i.args[1]);
 			break;
-//        case OP_MOVE_ONCE:
-//            break;
+        case OP_MOVE_ONCE:
+            assert(i.args.size() == 2);
+            OpMoveOnce(i.args[0], i.args[1]);
+                break;
 		case OP_ADD:
 			assert(i.args.size() == 3);
 			OpAdd(i.args[0], i.args[1], i.args[2]);
@@ -110,7 +112,21 @@ void VM::OpMove(const VMRegister& dst, const VMRegister& src)
         *dst_reg = *src_reg;
     }
     else
+    {
         *dst_reg = src;
+    }
+}
+
+void VM::OpMoveOnce(const VMRegister& dst, const VMRegister& src)
+{
+    if (skip_instructions.contains(instruction_pointer))
+    {
+        return;
+    }
+        
+    OpMove(dst, src);
+    
+    skip_instructions.emplace(instruction_pointer);
 }
 
 void VM::OpAdd(const VMRegister& dst, const VMRegister& a, const VMRegister& b)
@@ -225,8 +241,6 @@ void VM::OpLabel(const VMRegister& a, size_t ip)
 
 void VM::OpCall(const std::vector<VMRegister>& args)
 {
-	BeginRelativeRegIndex(instruction_pointer);
-
 	auto function_it = functions.find(args[0].value.str);
 	if (function_it != functions.end())
 		function_it->second.func(*this, args);
@@ -235,7 +249,12 @@ void VM::OpCall(const std::vector<VMRegister>& args)
 		auto labels_it = labels.find(args[0].value.num);
 		if (labels_it != labels.end())
 		{
-			// go to label 
+            BeginRelativeRegIndex(instruction_pointer);
+            for(size_t i = 1; i < args.size();i++)
+            {
+//                OpMove(const VMRegister &dst, const VMRegister &src)
+            }
+			// go to label
 			instruction_pointer = labels_it->second;
 		}
 		else
@@ -243,8 +262,6 @@ void VM::OpCall(const std::vector<VMRegister>& args)
 			throw std::runtime_error("no function like that");
 		}
 	}
-
-	EndRelativeRegIndex();
 }
 
 void VM::OpCallMove(const VMRegister& dst, const std::vector<VMRegister>& args)
@@ -268,6 +285,14 @@ VMRegister& VM::GetReg(uint64_t index)
 void VM::OpJump(const VMRegister& a)
 {
     instruction_pointer = labels.find(a.value.num)->second;
+}
+
+void VM::OpReturn()
+{
+    EndRelativeRegIndex();
+
+    instruction_pointer = ip_stack.top();
+    ip_stack.pop();
 }
 
 void VM::OpJumpIfNotEqual(const VMRegister& jump, const VMRegister& a, const VMRegister& b)

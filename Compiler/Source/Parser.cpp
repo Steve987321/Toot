@@ -19,6 +19,7 @@ static std::vector<std::string> errors;
 static size_t register_pos = 0;
 static std::set<std::string> function_sigs;
 static std::vector<std::unordered_map<std::string_view, VMRegister>> vars;
+static bool once = false;
 
 static std::vector<VM::Instruction> parse_res;
 
@@ -106,6 +107,11 @@ static void PrintInstruction(OP_CODE op_code, std::vector<VMRegister> args = {},
 
 static void AddInstruction(OP_CODE op_code, std::vector<VMRegister> args = {}, VMRegister reserved = {0, VMRegisterType::INVALID})
 {
+    if (once)
+    {
+        if (op_code == OP_MOVE)
+            op_code = OP_MOVE_ONCE;
+    }
 	// temp
 	PrintInstruction(op_code, args, reserved);
 
@@ -169,7 +175,7 @@ static Token* PeekPreviousToken(int steps = 1)
 	return res;
 }
 
-static bool IsTokenKeyword(const Token& token)
+static bool IsTokenNumKeyword(const Token& token)
 {
 	return token.type == TOKEN_TYPE::INT || token.type == TOKEN_TYPE::FLOAT /*|| token.type == TOKEN_TYPE::STRING*/;
 }
@@ -557,7 +563,7 @@ static VMRegister Identifier()
 			Token* prev = PeekPreviousToken();
 			if (prev)
 			{
-				if (IsTokenKeyword(*prev))
+				if (IsTokenNumKeyword(*prev))
 				{
 					AddError("Variable with identifier {} already exists", token->str.c_str());
 					return res;
@@ -869,6 +875,21 @@ static void NumberKeyword(TOKEN_TYPE type)
     IncrementToken();
 }
 
+static void OnceKeyword()
+{
+    once = true;
+    
+    // init var once or if scope then jump once
+    IncrementToken();
+    
+    if (token && IsTokenNumKeyword(*token))
+    {
+        NumberKeyword(token->type);
+    }
+    
+    once = false;
+}
+
 VMRegister Expression()
 {
 	VMRegister res{};
@@ -879,6 +900,9 @@ VMRegister Expression()
 		{
 		case TOKEN_TYPE::STRING_LITERAL:
 			break;
+        case TOKEN_TYPE::ONCE:
+            OnceKeyword();
+            break;
 		case TOKEN_TYPE::INT:
 			NumberKeyword(token->type);
 			break;
@@ -943,7 +967,6 @@ void AddLibToParserCtx(const CPPLib& lib)
 
 bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res)
 {
-	// recursive des$0.01
     register_pos = 0;
     
     vars.clear();
