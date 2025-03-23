@@ -28,6 +28,7 @@ enum OP_CODE
 	OP_JUMP_IF_EQUAL,
     OP_JUMP_IF_LESS,
     OP_JUMP_IF_GREATER,
+    OP_JUMP_ONCE,
 	//OP_SETRELREGINDEX, // for the vm to handle
 	OP_RETURN,
 	BYTE_CODE_COUNT,
@@ -107,7 +108,7 @@ public:
 	void OpDivide(const VMRegister& dst, const VMRegister& a, const VMRegister& b);
 	void OpLabel(const VMRegister& a, size_t ip); // this is diff
     void OpJump(const VMRegister& jump);
-//    void OpJumpOnce(const VMRegister& jump);
+    void OpJumpOnce(const VMRegister& jump);
     void OpReturn();
     
 	// jump to ip or label depending on type

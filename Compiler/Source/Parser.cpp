@@ -884,10 +884,26 @@ static void OnceKeyword()
     // init var once or if scope then jump once
     IncrementToken();
     
-    if (token && IsTokenNumKeyword(*token))
+    if (token)
     {
-        NumberKeyword(token->type);
+        if (IsTokenNumKeyword(*token))
+            NumberKeyword(token->type);
+        else if (token->type == TOKEN_TYPE::BRACKET_LEFT)
+        {
+            VMRegister begin = CreateUniqueLabelRegister();
+            VMRegister end = CreateUniqueLabelRegister();
+            
+            // jump to end of scope
+            AddInstruction(OP_CODE::OP_JUMP, {end});
+            AddInstruction(OP_CODE::OP_DEFINE_LABEL, {begin});
+            BeginInnerScope();
+            AddInstruction(OP_CODE::OP_DEFINE_LABEL, {end});
+            AddInstruction(OP_CODE::OP_JUMP_ONCE, {begin});
+            
+            IncrementToken();
+        }
     }
+    
     
     once = false;
 }

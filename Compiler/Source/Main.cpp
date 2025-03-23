@@ -11,6 +11,13 @@ R"(
         WriteOut(f);
     }
 
+    once
+    {
+        WriteOut(543);
+    }
+
+        WriteOut(2222);
+
     // Nothing();
 	//int a = -5;
     //Nothing(a,-a);
@@ -34,6 +41,8 @@ int main()
 
         vm.instructions = byte_codes;
         vm.Init();
+        vm.Run();
+        vm.instruction_pointer = 0;
         vm.Run();
     }
     

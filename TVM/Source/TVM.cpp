@@ -100,6 +100,10 @@ void VM::Run()
             assert(i.args.size() == 3);
             OpJumpIfLess(i.args[0], i.args[1], i.args[2]);
             break;
+        case OP_JUMP_ONCE:
+            assert(i.args.size() == 1);
+            OpJumpOnce(i.args[0]);
+            break;
         case OP_RETURN:
 			break;
 		default: 
@@ -298,6 +302,18 @@ VMRegister& VM::GetReg(uint64_t index)
 void VM::OpJump(const VMRegister& a)
 {
     instruction_pointer = labels.find(a.value.num)->second;
+}
+
+void VM::OpJumpOnce(const VMRegister& a)
+{
+    if (skip_instructions.contains(instruction_pointer))
+    {
+        return;
+    }
+    
+    skip_instructions.emplace(instruction_pointer);
+
+    OpJump(a);
 }
 
 void VM::OpReturn()
