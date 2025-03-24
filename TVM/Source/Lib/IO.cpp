@@ -66,7 +66,6 @@ namespace IO
 		{
 			vm.functions[f.function_sig] = f;
 		}
-        
-        
+        vm.used_cpp_libs.emplace_back(lib);
 	}
 }

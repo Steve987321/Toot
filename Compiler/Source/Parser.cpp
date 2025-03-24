@@ -31,7 +31,7 @@ static void AddError(std::string_view format, TArgs... args)
 {
 	char buf[128]{};
 	snprintf(buf, sizeof(buf), format.data(), args...);
-	// std::cout << buf << std::endl;
+    std::cout << buf << std::endl;
 	errors.emplace_back(buf);
 }
 
@@ -240,50 +240,48 @@ static bool GetFunctionArgs(const std::string& func_name, std::vector<VMRegister
             }
 
             // check if definition
-            if (next->type == TOKEN_TYPE::BRACKET_LEFT)
+//            if (next->type == TOKEN_TYPE::BRACKET_LEFT)
+//            {
+//                // if (store_return)
+//                // {
+//                //     AddError("Can't assign to function definition");
+//                //     return;
+//                // }
+//
+//                auto [stored_sig, _] = function_sigs.emplace(sig);
+//                VMRegister func{};
+//                func.type = VMRegisterType::STRING;
+//                func.value.str = stored_sig->c_str();
+//
+//                AddInstruction(OP_DEFINE_LABEL, {func});
+//
+//                while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
+//                    Expression();
+//
+//                AddInstruction(OP_RETURN);
+//            }
+       
+            // check if there exists a signature that takes these argument types
+            if (!function_sigs.contains(sig))
             {
-                // if (store_return)
-                // {
-                //     AddError("Can't assign to function definition");
-                //     return;
-                // }
-
-                auto [stored_sig, _] = function_sigs.emplace(sig);
-                VMRegister func{};
-                func.type = VMRegisterType::STRING;
-                func.value.str = stored_sig->c_str();
-
-                AddInstruction(OP_DEFINE_LABEL, {func});
-
-                while (token->type != TOKEN_TYPE::BRACKET_RIGHT)
-                    Expression();
-
-                AddInstruction(OP_RETURN);
-            }
-            else if (next->type == TOKEN_TYPE::SEMICOLON)
-            {
-                // check if there exists a signature that takes these argument types
-                if (!function_sigs.contains(sig))
+                // check if there exists a signature that takes all types
+                std::string func_name = sig.substr(0, sig.find(' '));
+                if (function_sigs.contains(func_name + " ..."))
+                    sig = func_name + " ...";
+                else
                 {
-                    // check if there exists a signature that takes all types
-                    std::string func_name = sig.substr(0, sig.find(' '));
-                    if (function_sigs.contains(func_name + " ..."))
-                        sig = func_name + " ...";
-                    else
-                    {
-                        // cooked
-                        AddError("No function found with signature %s", sig.c_str());
-                        return false;
-                    }
+                    // cooked
+                    AddError("No function found with signature %s", sig.c_str());
+                    return false;
                 }
-
-                // if (store_return)
-                // {
-                    
-                // }
-            
-                break;
             }
+
+            // if (store_return)
+            // {
+                
+            // }
+        
+            break;
         }
         
         pos = i;
@@ -294,16 +292,12 @@ static bool GetFunctionArgs(const std::string& func_name, std::vector<VMRegister
         {
             assert(arg.type == VMRegisterType::REGISTER);
             args_as_registers.emplace_back(arg);
-            i = pos;
+            
+            if (token && token->type == TOKEN_TYPE::PARENTHESES_RIGHT)
+                i = pos - 1;
+            else
+                i = pos;
         }
-                
-		//Register* arg_reg = GetVarRegister(t.str);
-		//if (arg_reg)
-		//{
-		//	args_as_registers.emplace_back(*arg_reg);
-		//}
-	
-		
 	}
 
 	return true;
@@ -385,7 +379,6 @@ static VMRegister Unary()
 		VMRegister* reg = GetVarRegister(token->str);
 		if (!reg)
 		{
-			// #todo: check function signature
             Token* next = PeekNextToken();
 			if (next && next->type == TOKEN_TYPE::PARENTHESES_LEFT)
 			{
@@ -393,12 +386,22 @@ static VMRegister Unary()
                 std::string sig;
 				std::vector<VMRegister> args_as_registers;
                 
+                Token* prev = PeekPreviousToken();
+                
                 IncrementToken();
 				if (GetFunctionArgs(func_name, args_as_registers, sig))
 				{
-					res = CreateRegisterDst(register_pos);
-					register_pos++;
-                    CallFunctionEx(sig, args_as_registers, res);
+                    if (prev && (prev->type == TOKEN_TYPE::SEMICOLON || prev->type == TOKEN_TYPE::BRACKET_LEFT || prev->type == TOKEN_TYPE::BRACKET_RIGHT))
+                    {
+                        CallFunction(sig, args_as_registers);
+                    }
+                    else
+                    {
+                        res = CreateRegisterDst(register_pos);
+                        register_pos++;
+                        CallFunctionEx(sig, args_as_registers, res);
+                    }
+					
 					return res;
 				}
 			}
@@ -467,7 +470,8 @@ static VMRegister Factor()
 	VMRegister a = Unary();
 	if (a.value.num == -1)
 	{
-		AddError("Unexpected token after: %s", token->str.c_str());
+        return a;
+//		AddError("Unexpected token after: %s", token->str.c_str());
 	}
 
 	VMRegister dst = a;
@@ -506,7 +510,8 @@ static VMRegister PlusMinus()
 	VMRegister a = Factor();
 	if (a.value.num == -1)
 	{
-		AddError("Unexpected token after: {}", token->str.c_str());
+        return a;
+//		AddError("Unexpected token after: {}", token->str.c_str());
 	}
 
 	VMRegister dst = a;
@@ -549,96 +554,78 @@ static VMRegister ForLoop()
 static VMRegister Identifier()
 {
 	VMRegister res{};
-	res.type = VMRegisterType::STRING;
-	res.value.str = token->str.c_str();
 
 	// check if this identifier is a var that already exists 
-	for (size_t i = vars.size(); i-- > 0; )
-	{
-		auto varit = vars[i].find(res.value.str);
-		if (varit != vars[i].end())
-  		{
-			res = varit->second;
+    VMRegister* id_reg = GetVarRegister(token->str);
+    if (!id_reg)
+    {
+        Token* prev = PeekPreviousToken();
+        if (!prev || !IsTokenNumKeyword(*prev))
+        {
+            // probably a function call or something else
+            return PlusMinus();
+        }
+        if (prev && IsTokenNumKeyword(*prev))
+        {
+            IncrementToken();
+            if (!token || token->type != TOKEN_TYPE::ASSIGNMENT)
+            {
+                AddError("Expected assignmnent for declaring variable '%s'", res.value.str);
+                return res;
+            }
+            
+            // get the juice
+            IncrementToken();
+            
+            res = PlusMinus();
+            IncrementToken();
+            if (!token || token->type != TOKEN_TYPE::SEMICOLON)
+            {
+                if (token)
+                    AddError("Expected ; but got '%s'", token->str.c_str());
+                else
+                    AddError("Expected ;");
+                
+                return res;
+            }
+            
+            IncrementToken();
+            
+            return res;
+        }
+    }
 
-			Token* prev = PeekPreviousToken();
-			if (prev)
-			{
-				if (IsTokenNumKeyword(*prev))
-				{
-					AddError("Variable with identifier {} already exists", token->str.c_str());
-					return res;
-				}
-				else
-				{
-					// get the variable and chec
-					IncrementToken();
-					if (!token)
-						return res;
-					
-					if (IsTokenOperatorAssign(*token))
-					{
-						IncrementToken();
-						if (!token)
-							return res;
+    res = *id_reg;
 
-						VMRegister reg = PlusMinus();
-						AddInstruction(OP_MOVE, { varit->second, reg });
-					}
-//                    else if (IsTokenOperator(*token))
-//                    {
-//                        
-//                    }
-//                    else if (IsTokenComparison(*token))
-//                    {
-//                        
-//                    }
-				}
-			}
-			
-			return res;
-		}
-	}
+    Token* prev = PeekPreviousToken();
+    if (prev)
+    {
+        if (IsTokenNumKeyword(*prev))
+        {
+            AddError("Variable with identifier {} already exists", token->str.c_str());
+            return res;
+        }
+        else
+        {
+            // get the variable and chec
+            IncrementToken();
+            if (!token)
+                return res;
+            
+            if (IsTokenOperatorAssign(*token))
+            {
+                IncrementToken();
+                if (!token)
+                    return res;
 
-    // bool store_return = false;
-    // VMRegister store_return_reg;
-	// before checking for function check if it discards the return type
-	// Token* prev = PeekPreviousToken();
-	// if (prev && prev->type == TOKEN_TYPE::ASSIGNMENT)
-	// {
-	// 	Token* next = PeekNextToken();
-	// 	if (next && next->type == TOKEN_TYPE::PARENTHESES_LEFT)
-	// 		store_return = true; 
-	// 		// #todo: should check matching return type
-
-	// 	// where to store the return value
-	// 	Token* prev_var = PeekPreviousToken(2);
-	// }
-
-	IncrementToken();
-
-	if (!token)
-		return res;
-
-	// check if function call or definition
-	if (token->type == TOKEN_TYPE::PARENTHESES_LEFT)
-	{
-		res.type = VMRegisterType::FUNCTION;
-		std::string sig;
-		std::vector<VMRegister> args_as_registers;
-		if (GetFunctionArgs(res.value.str, args_as_registers, sig))
-		{
-			CallFunction(sig, args_as_registers);
-		}
-	}
+                VMRegister reg = PlusMinus();
+                AddInstruction(OP_MOVE, { *id_reg, reg });
+            }
+        }
+    }
 
 	return res;
 }
-
-// for the if statement ()
-// static void GetComparisonArgs(VMRegister& a, VMRegister& b)
-// {
-
-// }
 
 static VMRegister IfStatement()
 {
@@ -650,32 +637,24 @@ static VMRegister IfStatement()
 		VMRegister b;
 
         IncrementToken();
+        
 		// get first argument
-		if (token->type == TOKEN_TYPE::NUMBER)
-		{
-			a = PlusMinus();
-		}
-		else if (token->type == TOKEN_TYPE::IDENTIFIER)
-		{
-			a = Identifier();
-		}
-		else
-		{
-			AddError("after '(' Unexpected token: '%s'", token->str.c_str());
-			return {};
-		}
-
+        a = PlusMinus();
+	
 		// get comparison
 		if (!token)
 		{
 			AddError("unexpected end");
 			return {};
 		}
+        
+        if (token->type == TOKEN_TYPE::PARENTHESES_RIGHT)
+        {
+            IncrementToken();
+        }
 
 		Token& comp_type = *token;
-        // check if it is a comparison type 
         
-		// get second argument
 		IncrementToken();
 
 		if (!token)
@@ -683,20 +662,10 @@ static VMRegister IfStatement()
 			AddError("unexpected end");
 			return {};
 		}
-        if (IsTokenNumerical(*token))
-		{
-			b = PlusMinus();
-		}
-		else if (token->type == TOKEN_TYPE::IDENTIFIER)
-		{
-			b = Identifier();
-		}
-		else
-		{
-			AddError("after '%s' unexpected token: '%s'", comp_type.str.c_str(), token->str.c_str());
-			return {};
-		}
-		
+      
+        // get second argument
+        b = PlusMinus();
+	
 		// check branches 
 		IncrementToken();
 
@@ -839,42 +808,12 @@ static void NumberKeyword(TOKEN_TYPE type)
 		AddError("Unexpected identifier after int at: %d", pos);
 		return;
 	}
-
-	VMRegister id_res = Identifier();
-
-    VMRegister src{};
     
-    if (type == TOKEN_TYPE::INT)
-        src.type = VMRegisterType::INT;
-    else if (type == TOKEN_TYPE::FLOAT)
-        src.type = VMRegisterType::FLOAT;
+    const std::string& id_str = token->str;
     
-    if (token->type != TOKEN_TYPE::ASSIGNMENT)
-    {
-        AddError("Unexpected token after int at: {}", pos);
-        return;
-    }
-
-    IncrementToken();
-
-    VMRegister dst = PlusMinus();
-
-    vars.back().emplace(id_res.value.str, dst);
-
-    IncrementToken();
-
-    if (!token)
-    {
-        AddError("Expected token after int at: %d", pos);
-        return;
-    }
-    if (token->type != TOKEN_TYPE::SEMICOLON)
-    {
-        AddError("Unexpected token: %s. After int at: %d", token->str.c_str(), pos);
-        return;
-    }
-
-    IncrementToken();
+    VMRegister reg = Identifier();
+   
+    vars.back().emplace(id_str, reg);
 }
 
 static void OnceKeyword()
@@ -983,7 +922,7 @@ void AddLibToParserCtx(const CPPLib& lib)
     }
 }
 
-bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res)
+bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res, VM* vm)
 {
     register_pos = 0;
     
@@ -1003,7 +942,13 @@ bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_co
 	// begin the global scope 
 	vars.push_back({});
 	
-	AddLibToParserCtx(IO::GetIOLib());
+    if (vm)
+    {
+        for (const CPPLib& lib : vm->used_cpp_libs)
+        {
+            AddLibToParserCtx(lib);
+        }
+    }
 
 	Expression();
 

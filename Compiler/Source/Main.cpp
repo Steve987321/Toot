@@ -4,25 +4,31 @@
 const char* source =
 R"(
 	// string s = "stringa"; // X
-    once float f = 0.0;
+    //once float f = 0.0;
+    // int f = 12 + 12;
+    int a = Nothing() + Nothing();
 
-    if (f > 0.2)
+   // if (f > 0.2)
+   // {
+    //    WriteOut(f);
+    //}
+
+    if (Nothing() == Nothing())
     {
-        WriteOut(f);
+        WriteOut(a);
     }
 
-    once
-    {
-        WriteOut(543);
-    }
+   // once
+    //{
+    //    WriteOut(543);
+    //}
 
-        WriteOut(2222);
+     //   WriteOut(2222);
 
     // Nothing();
 	//int a = -5;
     //Nothing(a,-a);
 	
-	// WriteOut(f"c = {c}"); // Test the format string 
 	// WriteOut(c); 
 	// WriteOut(f); 
 	// WriteOut(1000);
@@ -34,11 +40,11 @@ int main()
 {
     std::vector<VM::Instruction> byte_codes;
     
-    if (Compiler::CompileString(source, byte_codes) != Compiler::CompileResult::ERR)
+    VM vm;
+    IO::RegisterToVM(vm);
+    
+    if (Compiler::CompileString(source, byte_codes, &vm) != Compiler::CompileResult::ERR)
     {
-        VM vm;
-        IO::RegisterToVM(vm);
-
         vm.instructions = byte_codes;
         vm.Init();
         vm.Run();

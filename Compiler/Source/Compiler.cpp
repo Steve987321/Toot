@@ -9,8 +9,8 @@
 namespace Compiler
 {
 
-    CompileResult CompileString(std::string_view str, std::vector<VM::Instruction>& res)
-	{
+CompileResult CompileString(std::string_view str, std::vector<VM::Instruction>& res, VM* vm)
+{
         error_msgs.clear();
         
 		std::cout << str << std::endl;
@@ -21,7 +21,7 @@ namespace Compiler
 			return CompileResult::ERR;
 
 		// to vm bytecodes
-		if (!Parse(tokens, res))
+		if (!Parse(tokens, res, vm))
             return CompileResult::ERR;
         
 		return CompileResult::NONE;
