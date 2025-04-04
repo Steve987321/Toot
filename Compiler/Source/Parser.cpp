@@ -641,8 +641,9 @@ static VMRegister IfStatement()
 		// get first argument
         a = PlusMinus();
         
+        // get comparison
         IncrementToken();
-		// get comparison
+        
 		if (!token)
 		{
 			AddError("unexpected end");
