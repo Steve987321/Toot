@@ -37,3 +37,9 @@
 # Binary folders
 bin/
 bin-intermediate/
+
+# IDE 
+.vscode/
+
+# Macos 
+.DS_STORE
