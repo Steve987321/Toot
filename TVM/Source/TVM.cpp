@@ -299,6 +299,15 @@ VMRegister& VM::GetReg(uint64_t index)
 	return registers[index + relative_register_index];
 }
 
+void VM::RegisterLib(const CPPLib &lib)
+{
+    for (const CPPFunction& f : lib.functions)
+    {
+        functions[f.function_sig] = f;
+    }
+    used_cpp_libs.emplace_back(lib);
+}
+
 void VM::OpJump(const VMRegister& a)
 {
     instruction_pointer = labels.find(a.value.num)->second;

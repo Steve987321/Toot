@@ -9,7 +9,7 @@
 #include <stack>
 #include <set>
 
-#include "Lib/IO.h"
+#include "Lib/CPPBinding.h"
 
 enum OP_CODE
 {
@@ -125,6 +125,9 @@ public:
 	// returns anything other then type REGISTER
 	VMRegister& GetValueAtReg();
     
+	// helper for registering cpp libraries to vm 
+	void RegisterLib(const CPPLib& lib);
+
 private:
 	// arg is usually ip 
 	void BeginRelativeRegIndex(uint64_t rel);

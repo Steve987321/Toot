@@ -58,14 +58,4 @@ namespace IO
 
 		return l;
 	}
-	
-	void RegisterToVM(VM& vm)
-	{
-		CPPLib lib = GetIOLib();
-		for (const CPPFunction& f : lib.functions)
-		{
-			vm.functions[f.function_sig] = f;
-		}
-        vm.used_cpp_libs.emplace_back(lib);
-	}
 }

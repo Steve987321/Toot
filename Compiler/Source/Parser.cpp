@@ -640,7 +640,8 @@ static VMRegister IfStatement()
         
 		// get first argument
         a = PlusMinus();
-	
+        
+        IncrementToken();
 		// get comparison
 		if (!token)
 		{
@@ -676,7 +677,7 @@ static VMRegister IfStatement()
 		}
 		if (token->type != TOKEN_TYPE::PARENTHESES_RIGHT)
 		{
-			AddError("Unexpected token {}, expected ')'", token->str.c_str());
+			AddError("Unexpected token %s, expected ')'", token->str.c_str());
 			return {};
 		}
 	
@@ -689,7 +690,7 @@ static VMRegister IfStatement()
 		}
 		if (token->type != TOKEN_TYPE::BRACKET_LEFT)
 		{
-			AddError("Unexpected token {}, expected ')'", token->str.c_str());
+			AddError("Unexpected token %s, expected ')'", token->str.c_str());
 			return {};
 		}
 
@@ -847,6 +848,34 @@ static void OnceKeyword()
     once = false;
 }
 
+static void Return()
+{
+    Token* next = PeekNextToken();
+    VMRegister arg;
+    
+    if (!next)
+    {
+        AddError("Unexpected end after 'return'");
+        return;
+    }
+    if (next->type == TOKEN_TYPE::MULTIPLY)
+    {
+        IncrementToken();
+        IncrementToken();
+        arg = PlusMinus();
+    }
+    else
+    {
+        if (next->type != TOKEN_TYPE::SEMICOLON)
+        {
+            AddError("Unexpected token '%s'. Expected ';'", next->str.c_str());
+            return;
+        }
+    }
+    
+    AddInstruction(OP_CODE::OP_RETURN, {arg});
+}
+
 VMRegister Expression()
 {
 	VMRegister res{};
@@ -887,6 +916,9 @@ VMRegister Expression()
             return {};
             break;
         }
+        case TOKEN_TYPE::RETURN:
+            Return();
+            break;
 		case TOKEN_TYPE::IDENTIFIER:
         {
             VMRegister id = Identifier();
