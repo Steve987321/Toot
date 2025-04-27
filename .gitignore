@@ -43,3 +43,5 @@ bin-intermediate/
 
 # Macos 
 .DS_STORE
+.vscode
+*.xcworkspace
