@@ -12,7 +12,7 @@ Compiler/   # (Application) Compiles string to instructions
 TVM/        # (Static lib)  VM that runs instructions
 ``` 
 
-Currenlty the compiler application is used for testing and will not take any arguments. 
+Currently the compiler application is used for testing and will not take any arguments. 
 
 ## Syntax Examples
 
