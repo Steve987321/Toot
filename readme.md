@@ -8,7 +8,7 @@ Use the premake5 script to generate project files.
 
 Project layout: 
 ```bash
-Compiler/   # (Application) Compiles string to instructions 
+Compiler/	# (Application) Compiles string to instructions 
 TVM/		# (Static lib)  VM that runs instructions
 ``` 
 
