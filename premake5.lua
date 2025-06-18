@@ -1,14 +1,14 @@
 workspace "ToadLanguage"
 
-    configurations 
-    { 
-        "Debug", 
-        "Release", 
-    }
+	configurations 
+	{ 
+		"Debug", 
+		"Release", 
+	}
 
-    startproject "Compiler"
-    
-    output_dir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+	startproject "Compiler"
+	
+	output_dir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 	architecture "x64"
 	language "c++"

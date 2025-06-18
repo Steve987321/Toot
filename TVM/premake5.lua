@@ -4,12 +4,12 @@ project "TVM"
 	targetdir ("../bin/" .. output_dir .. "/")
 	objdir ("../bin-intermediate/" .. output_dir .. "/")
 
-    flags {"MultiProcessorCompile"}
+	flags {"MultiProcessorCompile"}
 
 	files {
-        "Source/**.cpp",
-        "Source/**.h",
-    }
+		"Source/**.cpp",
+		"Source/**.h",
+	}
 
 	includedirs {
 		"Source/",

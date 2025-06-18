@@ -5,8 +5,8 @@
 #include <vector>
 #include <string_view>
 
-#define REGISTER_LIBFUNC(lib, function, args)                                \
-lib.functions.emplace_back(function, #function, args, #function " " args)    \
+#define REGISTER_LIBFUNC(lib, function, args)								\
+lib.functions.emplace_back(function, #function, args, #function " " args)	\
 
 class VM;
 struct VMRegister;

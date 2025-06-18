@@ -17,8 +17,8 @@ namespace Compiler
 		{"int", TOKEN_TYPE::INT},
 		{"float", TOKEN_TYPE::FLOAT},
 		{"for", TOKEN_TYPE::FOR},
-        {"once", TOKEN_TYPE::ONCE},
-        {"return", TOKEN_TYPE::RETURN},
+		{"once", TOKEN_TYPE::ONCE},
+		{"return", TOKEN_TYPE::RETURN},
 	};
 
 	static bool GetNextChar(char& c)
@@ -31,21 +31,21 @@ namespace Compiler
 
 		return true;
 	}
-    
-    // returns true if it reached the end
-    static bool SkipWhiteSpace(char& c)
-    {
-        while (std::isspace(c) || c == '\0')
-        {
-            pos++;
-            if (pos >= source.size())
-                return true;
+	
+	// returns true if it reached the end
+	static bool SkipWhiteSpace(char& c)
+	{
+		while (std::isspace(c) || c == '\0')
+		{
+			pos++;
+			if (pos >= source.size())
+				return true;
 
-            c = source[pos];
-        }
-        
-        return false;
-    }
+			c = source[pos];
+		}
+		
+		return false;
+	}
 
 	static bool SkipComment()
 	{
@@ -134,11 +134,11 @@ namespace Compiler
 				continue;
 			}
 
-            if (c == '.')
-            {
-                floating_point = true;
-                continue;
-            }
+			if (c == '.')
+			{
+				floating_point = true;
+				continue;
+			}
 
 			if (!std::isdigit(c))
 				return;
@@ -146,7 +146,7 @@ namespace Compiler
 		}
 
 		if (floating_point)
-            token.type = TOKEN_TYPE::DECIMAL_NUMBER;
+			token.type = TOKEN_TYPE::DECIMAL_NUMBER;
 		else
 			token.type = TOKEN_TYPE::NUMBER;
 	}
@@ -188,9 +188,9 @@ namespace Compiler
 
 				if (std::isspace(source[i]))
 					continue;
-                
-                if (source[i] == '.')
-                    continue;
+				
+				if (source[i] == '.')
+					continue;
 
 				if (source[i] != ';' || source[i] != ')')
 				{
@@ -238,33 +238,33 @@ namespace Compiler
 		case ')':
 			res.type = TOKEN_TYPE::PARENTHESES_RIGHT;
 			break;
-        case '{':
-            res.type = TOKEN_TYPE::BRACKET_LEFT;
-            break;
-        case '}':
-            res.type = TOKEN_TYPE::BRACKET_RIGHT;
-            break;
-        case ',':
-            res.type = TOKEN_TYPE::COMMA;
-            break;
+		case '{':
+			res.type = TOKEN_TYPE::BRACKET_LEFT;
+			break;
+		case '}':
+			res.type = TOKEN_TYPE::BRACKET_RIGHT;
+			break;
+		case ',':
+			res.type = TOKEN_TYPE::COMMA;
+			break;
 		case '=':
 			res.type = TOKEN_TYPE::ASSIGNMENT;
 			CheckFinishToken(res, '=', TOKEN_TYPE::COMPARISON);
 			break;
-        case '<':
-            res.type = TOKEN_TYPE::LESS;
-            break;
-        case '>':
-            res.type = TOKEN_TYPE::GREATER;
-            break;
-        case '&':
-            res.type = TOKEN_TYPE::BITWISE_AND;
-            CheckFinishToken(res, '&', TOKEN_TYPE::AND);
-            break;
-        case '|':
-            res.type = TOKEN_TYPE::BITWISE_OR;
-            CheckFinishToken(res, '|', TOKEN_TYPE::OR);
-            break;
+		case '<':
+			res.type = TOKEN_TYPE::LESS;
+			break;
+		case '>':
+			res.type = TOKEN_TYPE::GREATER;
+			break;
+		case '&':
+			res.type = TOKEN_TYPE::BITWISE_AND;
+			CheckFinishToken(res, '&', TOKEN_TYPE::AND);
+			break;
+		case '|':
+			res.type = TOKEN_TYPE::BITWISE_OR;
+			CheckFinishToken(res, '|', TOKEN_TYPE::OR);
+			break;
 		case '!':
 			res.type = TOKEN_TYPE::NOT;
 			CheckFinishToken(res, '=', TOKEN_TYPE::NOT_EQUAL);
@@ -291,7 +291,7 @@ namespace Compiler
 				CheckIdentifier(res);
 			break;
 		}
-        
+		
 		return res;
 	}
 
@@ -307,29 +307,29 @@ namespace Compiler
 		while (pos < source.size())
 		{
 			char c = source[pos];
-            
-            if (SkipWhiteSpace(c))
-            {
-                return true;
-            }
+			
+			if (SkipWhiteSpace(c))
+			{
+				return true;
+			}
 
 			if (SkipComment())
 			{
 				// update to character after comment 
 				c = source[pos];
-                
-                // skip whitespace again
-                if (SkipWhiteSpace(c))
-                {
-                    return true;
-                }
+				
+				// skip whitespace again
+				if (SkipWhiteSpace(c))
+				{
+					return true;
+				}
 			}
-            
+			
 			Token token = GetToken(c);
 			tokens.emplace_back(token);
-            
+			
 			std::cout << token.str << ' ' << (int)token.type << std::endl;
-            
+			
 			if (token.type == TOKEN_TYPE::ERROR)
 				return false;
 

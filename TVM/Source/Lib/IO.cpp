@@ -18,7 +18,7 @@ namespace IO
 			assert(false && "redart");
 			break;
 		case VMRegisterType::STRING:
-            std::cout << reg.value.str;
+			std::cout << reg.value.str;
 			break;
 		case VMRegisterType::FLOAT:
 			std::cout << reg.value.flt;
@@ -29,12 +29,12 @@ namespace IO
 		default:
 			break;
 		}
-        std::cout << std::endl;
-        
-        return {};
+		std::cout << std::endl;
+		
+		return {};
 	}
 
-    VMRegister Nothing(VM &vm, const std::vector<VMRegister> &args)
+	VMRegister Nothing(VM &vm, const std::vector<VMRegister> &args)
 	{
 		VMRegister r;
 		r.type = VMRegisterType::INT;
@@ -42,7 +42,7 @@ namespace IO
 		return r;
 	}
 
-    CPPLib GetIOLib()
+	CPPLib GetIOLib()
 	{
 		CPPLib l;
 		l.name = "io";
