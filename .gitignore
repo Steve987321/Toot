@@ -1,4 +1,4 @@
-﻿# Prerequisites
+# Prerequisites
 *.d
 
 # Compiled Object files
@@ -33,13 +33,14 @@
 
 # Generated project files
 .vs
+.vscode/
 
 # Binary folders
 bin/
 bin-intermediate/
 
-# IDE 
-.vscode/
+# CMake build files
+Tests/build
 
 # Macos 
 .DS_STORE
