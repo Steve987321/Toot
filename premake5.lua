@@ -1,3 +1,5 @@
+require "Scripts/cmake"
+
 workspace "ToadLanguage"
 
 	configurations 
