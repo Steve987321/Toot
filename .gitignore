@@ -34,6 +34,11 @@
 # Generated project files
 .vs
 .vscode/
+*.sln
+*.xcworkspace
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.users
 
 # Binary folders
 bin/
@@ -41,8 +46,7 @@ bin-intermediate/
 
 # CMake build files
 Tests/build
+build/
 
 # Macos 
 .DS_STORE
-.vscode
-*.xcworkspace
