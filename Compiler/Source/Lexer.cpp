@@ -7,16 +7,15 @@
 namespace Compiler
 {
 	static std::string source;
-	static uint32_t line = 0;
-	static size_t pos = 0;
+	static uint32_t line = 0; 	// current line the lexer is at 
+	static size_t pos = 0;		// current char position the lexer is at  
 
-	std::unordered_map<std::string, TOKEN_TYPE> keywords
+	static std::unordered_map<std::string, TOKEN_TYPE> keywords
 	{
 		{"if", TOKEN_TYPE::IF},
 		{"else", TOKEN_TYPE::ELSE},
 		{"int", TOKEN_TYPE::INT},
 		{"float", TOKEN_TYPE::FLOAT},
-		{"for", TOKEN_TYPE::FOR},
 		{"once", TOKEN_TYPE::ONCE},
 		{"return", TOKEN_TYPE::RETURN},
 	};
@@ -32,7 +31,12 @@ namespace Compiler
 		return true;
 	}
 	
-	// returns true if it reached the end
+	/**
+	 * @brief Skips whitespace, after calling this can continue lexing as usual
+	 * 
+	 * @param c starting character, usually source[pos]
+	 * @return true if it reached the end of source 
+	 */
 	static bool SkipWhiteSpace(char& c)
 	{
 		while (std::isspace(c) || c == '\0')
@@ -47,6 +51,10 @@ namespace Compiler
 		return false;
 	}
 
+	/// @brief Skip comments in source, after calling can continue lexing as usual.
+	///
+	/// Comments are: // until newline or end
+	/// @return 
 	static bool SkipComment()
 	{
 		// check if comment
@@ -83,17 +91,17 @@ namespace Compiler
 
 			return true;
 		}
-		else if (next == '*')
-		{
-			// skip until */
-
-		}
 
 		return false;
 	}
 
-	// minor aids 
-
+	/**
+	 * @brief 
+	 * 
+	 * @param token 
+	 * @param possible_next 
+	 * @param possible_type 
+	 */
 	static void CheckFinishToken(Token& token, char possible_next, TOKEN_TYPE possible_type)
 	{
 		char next = 0;
@@ -151,14 +159,24 @@ namespace Compiler
 			token.type = TOKEN_TYPE::NUMBER;
 	}
 
+	/**
+	 * @brief 
+	 * 
+	 * @param token 
+	 * @param c 
+	 * @return true 
+	 */
 	static bool AdvanceUnfinishedToken(Token& token, char c = ' ')
 	{
 		if (std::isalpha(source[pos]))
 		{
 			for (size_t i = pos; i < source.size(); i++)
 			{
-				if (std::isspace(source[i]) || source[i] == c)
+				if (std::isspace(source[i]) || source[i] == c || i == source.size() - 1)
 				{
+					if (i == source.size() - 1)
+						i++;
+
 					token.str = source.substr(pos, i - pos);
 					
 					if (keywords.contains(token.str))
@@ -174,7 +192,7 @@ namespace Compiler
 				{
 					token.str = source.substr(pos, i - pos);
 					token.type = TOKEN_TYPE::IDENTIFIER;
-					pos = i - 1; // so the next token will read the semicolon 
+					pos = i - 1; // so the next token will read the semicolon or the other ones
 					return true;
 				}
 			}
@@ -229,6 +247,12 @@ namespace Compiler
 			res.type = TOKEN_TYPE::SEMICOLON;
 			break;
 		case '"':
+			pos++;
+			if (pos == source.size())
+			{				
+				res.type = TOKEN_TYPE::ERROR;
+				return res;
+			}
 			AdvanceUnfinishedToken(res, '"');
 			res.type = TOKEN_TYPE::STRING_LITERAL;
 			break;
@@ -246,6 +270,9 @@ namespace Compiler
 			break;
 		case ',':
 			res.type = TOKEN_TYPE::COMMA;
+			break;
+		case '#':
+			res.type = TOKEN_TYPE::HASHTAG;
 			break;
 		case '=':
 			res.type = TOKEN_TYPE::ASSIGNMENT;

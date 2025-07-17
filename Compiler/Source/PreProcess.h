@@ -2,6 +2,9 @@
 
 #include <vector>
 
-struct Token;
+namespace Compiler
+{
+    struct Token;
 
-void PreProcess(std::vector<Token>& tokens);
+    bool PreProcess(std::vector<Token>& tokens);    
+}

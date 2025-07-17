@@ -5,7 +5,6 @@
 
 namespace Compiler
 {
-
 	enum class TOKEN_TYPE
 	{
 		ERROR,
@@ -19,6 +18,7 @@ namespace Compiler
 		IF,
 		ELSE,
 		FOR,
+		HASHTAG,
 		SEMICOLON,
 		BRACKET_LEFT,
 		BRACKET_RIGHT,

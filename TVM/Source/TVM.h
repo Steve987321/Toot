@@ -94,6 +94,7 @@ public:
 	std::unordered_map<std::string_view, CPPFunction> functions;
 	std::vector<CPPLib> used_cpp_libs;
 	std::set<uint64_t> skip_instructions;
+
 	void Init();
 
 	void Run();

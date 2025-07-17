@@ -14,3 +14,14 @@ project "TVM"
 	includedirs {
 		"Source/",
 	}
+
+	filter "configurations:Debug"
+		runtime "Debug"
+		symbols "on"
+		optimize "off"
+
+	filter "configurations:Release"
+		runtime "Release"
+		symbols "off"
+		optimize "on"
+

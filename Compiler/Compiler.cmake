@@ -32,7 +32,11 @@ target_link_libraries("Compiler"
 )
 target_compile_options("Compiler" PRIVATE
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:-m64>
+  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:-O0>
+  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:-g>
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-m64>
+  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-O0>
+  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-g>
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-std=c++20>
 )
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
@@ -67,7 +71,9 @@ target_link_libraries("Compiler"
 )
 target_compile_options("Compiler" PRIVATE
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:C>>:-m64>
+  $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:C>>:-O2>
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-m64>
+  $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-O2>
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-std=c++20>
 )
 if(CMAKE_BUILD_TYPE STREQUAL Release)

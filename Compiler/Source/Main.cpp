@@ -5,39 +5,11 @@
 
 const char* source =
 R"(
-	// string s = "stringa"; // X
-	//once float f = 0.0;
-	// int f = 12 + 12;
-	int a = Nothing() + Nothing();
+	#include "somejuice.txt"
 
-   // if (f > 0.2)
-   // {
-	//	WriteOut(f);
-	//}
-
-	if (Nothing() + Nothing() == a)
-	{
-		WriteOut(a);
-	}
-
-   // once
-	//{
-	//	WriteOut(543);
-	//}
-
-	 //   WriteOut(2222);
-
-	// Nothing();
-	//int a = -5;
-	//Nothing(a,-a);
-	
-	// WriteOut(c); 
-	// WriteOut(f); 
-	// WriteOut(1000);
-	// WriteOut(100*20);
+	int abc = a * 2;
 )";
 
-#include <iostream>
 int main()
 {
 	std::vector<VM::Instruction> byte_codes;
