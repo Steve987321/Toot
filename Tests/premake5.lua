@@ -4,7 +4,7 @@ require "../scripts/ecc"
 workspace "Tests"
 
     cppdialect "C++20"
-	output_dir = "%{cfg.buildcfg}-%{cfg.system}"
+	output_dir = "%{cfg.buildcfg}"
 
     configurations
     {

@@ -17,9 +17,9 @@ if(CMAKE_BUILD_TYPE STREQUAL Release)
   )
   set_target_properties("Tests" PROPERTIES
     OUTPUT_NAME "Tests"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release-macosx"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release-macosx"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release-macosx"
+    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release"
+    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release"
+    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release"
   )
 endif()
 target_include_directories("Tests" PRIVATE
@@ -54,9 +54,9 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
   )
   set_target_properties("Tests" PROPERTIES
     OUTPUT_NAME "Tests"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug-macosx"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug-macosx"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug-macosx"
+    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug"
+    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug"
+    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug"
   )
 endif()
 target_include_directories("Tests" PRIVATE

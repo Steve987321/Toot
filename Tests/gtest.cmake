@@ -45,9 +45,9 @@
 if(CMAKE_BUILD_TYPE STREQUAL Release)
   set_target_properties("gtest" PROPERTIES
     OUTPUT_NAME "gtest"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release-macosxgtest"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release-macosxgtest"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release-macosxgtest"
+    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Releasegtest"
+    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Releasegtest"
+    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Releasegtest"
   )
 endif()
 target_include_directories("gtest" PRIVATE
@@ -77,9 +77,9 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set_target_properties("gtest" PROPERTIES
     OUTPUT_NAME "gtest"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug-macosxgtest"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug-macosxgtest"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug-macosxgtest"
+    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debuggtest"
+    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debuggtest"
+    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debuggtest"
   )
 endif()
 target_include_directories("gtest" PRIVATE
