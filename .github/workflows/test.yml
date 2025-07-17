@@ -30,6 +30,7 @@ jobs:
       
     - name: Build toot
       run: |
+        chmod +x .premake/premake5
         premake5 gmake2
         make config=release
 
