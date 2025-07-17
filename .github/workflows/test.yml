@@ -1,0 +1,46 @@
+name: test
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**'
+      - '!.github/**'
+      - '.github/workflows/test.yml'
+      - '!**.md'
+
+jobs:
+  test:
+    strategy:
+      matrix: 
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup premake
+      uses: abel0b/setup-premake@v2.4
+      with:
+          version: "5.0.0-beta3"
+      
+    - name: Build toot
+      run: |
+        premake5 gmake2
+        make config=release
+
+    - name: Build tests
+      run: |
+        cd Tests
+        premake5 gmake2
+        make config=release
+
+    - name: Run tests
+      run: |
+        cd bin/Release/
+        Tests
+        
