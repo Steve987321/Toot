@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string_view>
+#include <string>
 
 #define REGISTER_LIBFUNC(lib, function, args)								\
 lib.functions.emplace_back(function, #function, args, #function " " args)	\

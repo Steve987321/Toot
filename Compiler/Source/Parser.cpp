@@ -5,6 +5,7 @@
 #include <set>
 #include <format>
 #include <stack>
+#include <cstring>
 
 #include "Compiler.h"
 
