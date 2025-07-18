@@ -115,7 +115,7 @@ static void AddInstruction(OP_CODE op_code, std::vector<VMRegister> args = {}, V
 	// temp
 	PrintInstruction(op_code, args, reserved);
 
-	parse_res.emplace_back(op_code, args, reserved);
+	parse_res.push_back(VM::Instruction(args, op_code, reserved));
 }
 
 static void IncrementToken()

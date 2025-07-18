@@ -78,9 +78,14 @@ public:
 
 	struct Instruction
 	{
-		OP_CODE op;
+		Instruction() = default;
+		Instruction(const std::vector<VMRegister>& args, OP_CODE op, const VMRegister& reserved)
+			: args(args), op(op), reserved(reserved)
+		{}
+
 		std::vector<VMRegister> args;
 		VMRegister reserved;
+		OP_CODE op;
 	};
 
 	std::vector<Instruction> instructions;

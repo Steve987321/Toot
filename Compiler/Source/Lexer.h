@@ -52,8 +52,14 @@ namespace Compiler
 
 	struct Token 
 	{
-		TOKEN_TYPE type;
+		Token() = default;
+		
+		Token(const std::string& str, TOKEN_TYPE type, uint32_t line)
+			: str(str), type(type), line(line)
+		{}
+
 		std::string str;
+		TOKEN_TYPE type;
 		uint32_t line;
 	};
 
