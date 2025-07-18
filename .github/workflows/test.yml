@@ -38,6 +38,6 @@ jobs:
 
     - name: Run tests
       run: |
-        cd bin/Release/
+        cd Tests/bin/Release/
         ./Tests
         
