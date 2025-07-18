@@ -355,7 +355,7 @@ namespace Compiler
 			Token token = GetToken(c);
 			tokens.emplace_back(token);
 			
-			std::cout << token.str << ' ' << (int)token.type << std::endl;
+			// std::cout << token.str << ' ' << (int)token.type << std::endl;
 			
 			if (token.type == TOKEN_TYPE::ERROR)
 				return false;

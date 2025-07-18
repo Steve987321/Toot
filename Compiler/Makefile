@@ -32,8 +32,6 @@ DEFINES +=
 INCLUDES += -I../TVM/Source
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -std=c++20
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 ALL_LDFLAGS += $(LDFLAGS) -m64
 LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
@@ -48,6 +46,8 @@ ifeq ($(config),debug)
 TARGETDIR = ../bin/Debug-macosx-x86_64
 TARGET = $(TARGETDIR)/Compiler
 OBJDIR = ../bin-intermediate/Debug-macosx-x86_64/Debug/Compiler
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g -std=c++20
 LIBS += ../bin/Debug-macosx-x86_64/libTVM.a
 LDDEPS += ../bin/Debug-macosx-x86_64/libTVM.a
 
@@ -55,6 +55,8 @@ else ifeq ($(config),release)
 TARGETDIR = ../bin/Release-macosx-x86_64
 TARGET = $(TARGETDIR)/Compiler
 OBJDIR = ../bin-intermediate/Release-macosx-x86_64/Release/Compiler
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++20
 LIBS += ../bin/Release-macosx-x86_64/libTVM.a
 LDDEPS += ../bin/Release-macosx-x86_64/libTVM.a
 

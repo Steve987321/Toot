@@ -32,8 +32,6 @@ DEFINES +=
 INCLUDES += -ISource
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
-ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64
-ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -std=c++20
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
 LIBS +=
 LDDEPS +=
@@ -50,11 +48,15 @@ ifeq ($(config),debug)
 TARGETDIR = ../bin/Debug-macosx-x86_64
 TARGET = $(TARGETDIR)/libTVM.a
 OBJDIR = ../bin-intermediate/Debug-macosx-x86_64/Debug/TVM
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O0 -g -std=c++20
 
 else ifeq ($(config),release)
 TARGETDIR = ../bin/Release-macosx-x86_64
 TARGET = $(TARGETDIR)/libTVM.a
 OBJDIR = ../bin-intermediate/Release-macosx-x86_64/Release/TVM
+ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++20
 
 endif
 

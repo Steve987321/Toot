@@ -6,8 +6,8 @@
 #include <string_view>
 #include <string>
 
-#define REGISTER_LIBFUNC(lib, function, args)								\
-lib.functions.emplace_back(function, #function, args, #function " " args)	\
+#define REGISTER_LIBFUNC(lib, function, args)										\
+lib.functions.push_back(CPPFunction(function, #function, args, #function " " args))	\
 
 class VM;
 struct VMRegister;
@@ -18,10 +18,16 @@ class CPPFunction
 public:
 	using TFunction = std::function<VMRegister(VM& vm, const std::vector<VMRegister>&)>;
 
-	TFunction func = nullptr;
-	const char* function_name;
-	const char* accepted_args;
-	const char* function_sig; // function_name + accepted_args
+	CPPFunction() = default;
+
+	CPPFunction(TFunction f, const char* name, const char* args, const char* sig)
+		: func(f), function_name(name), accepted_args(args), function_sig(sig)
+	{}
+
+	TFunction func {};
+	const char* function_name = nullptr;
+	const char* accepted_args = nullptr;
+	const char* function_sig = nullptr; // function_name + accepted_args
 };
 
 struct CPPLib
