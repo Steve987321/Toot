@@ -39,6 +39,8 @@
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.users
+Makefile
+*.make
 
 # Binary folders
 bin/
