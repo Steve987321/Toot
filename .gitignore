@@ -41,6 +41,8 @@
 *.vcxproj.users
 Makefile
 *.make
+CMakeLists.txt
+*.cmake
 
 # Binary folders
 bin/
