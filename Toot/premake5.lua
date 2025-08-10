@@ -2,8 +2,8 @@ project "Toot"
 
     kind "StaticLib"	
 
-    targetdir ("bin/" .. output_dir .. "/")
-    objdir ("bin-intermediate/" .. output_dir .. "/")
+    targetdir ("%{wks.location}/bin" .. output_dir .. "/")
+    objdir ("%{wks.location}/bin-intermediate/" .. output_dir .. "/")
 
     files 
     {
@@ -13,7 +13,7 @@ project "Toot"
 
     includedirs
     {
-        "%{prj.name}",
+        "%{wks.location}/%{prj.name}",
     }
 
     filter "configurations:Debug"
