@@ -29,9 +29,19 @@ CompileResult CompileString(std::string_view str, std::vector<VM::Instruction>& 
 		return CompileResult::ERR;
 
 	// to vm bytecodes
-	if (!Parse(tokens, res, vm))
+
+	auto parse_res = Parse(tokens, vm);
+
+	if (parse_res)
+	{
+		res = *parse_res;
+	}
+	else
+	{
+		error_msgs.insert(error_msgs.end(), parse_res.error().begin(), parse_res.error().end());
 		return CompileResult::ERR;
-	
+	}
+
 	return CompileResult::NONE;
 }
 

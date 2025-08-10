@@ -1,20 +1,42 @@
 require "Scripts/cmake"
 
-workspace "ToadLanguage"
-
+workspace "Toot"
 	configurations 
 	{ 
 		"Debug", 
 		"Release", 
 	}
 
-	startproject "Compiler"
-	
 	output_dir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 	architecture "x64"
 	language "c++"
-	cppdialect "c++20"
+	cppdialect "c++23"
 
-	include "TVM"
-	include "Compiler"
+	project "Language"
+	
+		kind "StaticLib"	
+
+		targetdir ("../bin/" .. output_dir .. "/")
+		objdir ("../bin-intermediate/" .. output_dir .. "/")
+
+		files 
+		{
+			"Source/**.cpp",
+			"Source/**.h",
+		}
+
+		includedirs
+		{
+			"Source/",
+		}
+
+		filter "configurations:Debug"
+			runtime "Debug"
+			symbols "on"
+			optimize "off"
+
+		filter "configurations:Release"
+			runtime "Release"
+			symbols "off"
+			optimize "on"

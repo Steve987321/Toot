@@ -24,6 +24,5 @@ set(CMAKE_CXX_FLAGS_DEBUG "")
 set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
-project("ToadLanguage")
-include(Compiler/Compiler.cmake)
-include(TVM/TVM.cmake)
+project("Toot")
+include(Language.cmake)

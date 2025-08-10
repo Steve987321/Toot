@@ -52,8 +52,8 @@ enum class VMRegisterType
 
 union VMRegisterValue
 {
-	int32_t num;
-	float flt;
+	int64_t num;
+	double flt;
 	const char* str;
 };
 

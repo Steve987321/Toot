@@ -1,17 +1,24 @@
 #include "PreProcess.h"
 #include "Lexer.h"
 
+#include "system/File.h"
+
 #include <set>
 #include <unordered_map>
 #include <functional>
-#include <filesystem>
-#include <fstream>
-#include <sstream>
 
 namespace Compiler
 {
 
 namespace fs = std::filesystem;
+
+enum class IncludeResult
+{
+	OK,
+	NO_FILE_SPECIFIED, 	// missing string path argument 
+	INVALID_ARGUMENT,	// string path must be a string literal to a file 
+	FILE_NOT_FOUND,		// can't find the file
+};
 
 struct PreProcessContext
 {
@@ -37,15 +44,13 @@ static void IncrementToken(PreProcessContext& ctx)
 		ctx.token = nullptr;
 }
 
-static bool ReadFile(const fs::path& file_path, std::string& out)
+static bool PreProcessWarning(PreProcessContext& ctx)
 {
-	std::ifstream file(file_path);
-	if (!file)
-		return false; 
-		
-	std::stringstream buffer;
-	buffer << file.rdbuf();
-	out = buffer.str();
+	return true;
+}
+
+static bool PreProcessError(PreProcessContext& ctx)
+{
 	return true;
 }
 
@@ -96,6 +101,8 @@ static bool PreProcessInclude(PreProcessContext& ctx)
 const static std::unordered_map<std::string_view, std::function<bool(PreProcessContext&)>> pre_process_commands
 {
 	{"include", PreProcessInclude},
+	{"warning", PreProcessWarning},
+	{"error", PreProcessError},
 };
 
 static bool GetPreProcessCommand(PreProcessContext& ctx)

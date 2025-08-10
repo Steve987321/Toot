@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Lexer.h"
 #include <vector>
 #include <set>
-#include "TVM.h"
+#include <expected>
 
-inline std::unordered_map<OP_CODE, std::string> op_code_names
+#include "Lexer.h"
+#include "tvm/TVM.h"
+
+inline std::unordered_map<OP_CODE, std::string_view> op_code_names
 {
 	{OP_CODE::OP_DEFINE_LABEL, "OP_DEFINE_LABEL"},
 	{OP_CODE::OP_MOVE, "OP_MOVE"},
@@ -33,5 +35,5 @@ namespace Compiler
 
 	// returns true if there is no errors
 	// use optional vm arg to add context
-	bool Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res, VM* vm = nullptr);
+	std::expected<std::vector<VM::Instruction>, std::vector<std::string>> Parse(const std::vector<Token>& tokens, VM* vm = nullptr);
 }

@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "TVM.h"
+#include "tvm/TVM.h"
 
 namespace Compiler
 {
