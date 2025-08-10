@@ -3,8 +3,7 @@ require "../scripts/ecc"
 
 workspace "Tests"
 
-    cppdialect "C++20"
-	output_dir = "%{cfg.buildcfg}"
+    cppdialect "C++23"
 
     configurations
     {
@@ -12,12 +11,14 @@ workspace "Tests"
         "Debug",
     }
 
+    output_dir = "%{cfg.buildcfg}"
+
     project "gtest"
         kind "StaticLib"
         language "C++"
 
-        targetdir ("bin/" .. output_dir .. "%{prj.name}")
-        objdir ("bin-intermediate/" .. output_dir .. "%{prj.name}")
+        targetdir ("bin/" .. output_dir .. "/%{prj.name}")
+        objdir ("bin-intermediate/" .. output_dir .. "/%{prj.name}")
 
         includedirs
         {
@@ -45,7 +46,6 @@ workspace "Tests"
             symbols "off"
             optimize "on"
 
-
     project "Tests"
         kind "ConsoleApp"
         language "C++"
@@ -57,32 +57,25 @@ workspace "Tests"
 
         includedirs
         {
-            "../libs/googletest/googletest/include",
-            "../Compiler/Source",
-            "../TVM/Source",
+            "../Libs/googletest/googletest/include",
+            "../Toot",
         }
 
         files 
         {
-            "../Compiler/Source/**.cpp",
-            "../TVM/Source/**.cpp",
+            -- toot 
+            "../Toot/**.cpp",
 
             -- tests
             "TVM/**.cpp",
             "Compiler/**.cpp",
-            "../libs/googletest/googletest/src/gtest_main.cc",
-        }
-
-        removefiles
-        {
-            "../Compiler/Source/Main.cpp",
+            "../Libs/googletest/googletest/src/gtest_main.cc",
         }
 
         filter "configurations:Debug"
             runtime "Debug"
             symbols "on"
             optimize "off"
-
 
         filter "configurations:Release"
             runtime "Release"

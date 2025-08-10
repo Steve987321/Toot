@@ -1033,7 +1033,7 @@ private:
 	bool once = false; 
 };
 
-std::expected<std::vector<VM::Instruction>, std::vector<std::string>> Parse(const std::vector<Token>& tokens, std::vector<VM::Instruction>& op_codes_res, VM* vm)
+std::expected<std::vector<VM::Instruction>, std::vector<std::string>> Parse(const std::vector<Token>& tokens, VM* vm)
 {
 	// if (tokens.empty())
 	// 	return std::unexpected();

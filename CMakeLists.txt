@@ -25,4 +25,4 @@ set(CMAKE_C_FLAGS_RELEASE "")
 set(CMAKE_CXX_FLAGS_RELEASE "")
 
 project("Toot")
-include(Language.cmake)
+include(Toot/Toot.cmake)

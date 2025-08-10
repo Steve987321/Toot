@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "TVM.h"
+#include "tvm/TVM.h"
 
 TEST(TVM, OpCall)
 {

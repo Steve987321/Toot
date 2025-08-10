@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Lexer.h"
+#include "compiler/Lexer.h"
 
 TEST(Lexer, Whitespace)
 {

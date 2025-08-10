@@ -1,12 +1,13 @@
 ﻿add_executable("Tests"
-        "../Compiler/Source/Compiler.cpp"
-        "../Compiler/Source/Lexer.cpp"
-        "../Compiler/Source/Parser.cpp"
-        "../Compiler/Source/PreProcess.cpp"
-          "../TVM/Source/Lib/CPPBinding.cpp"
-          "../TVM/Source/Lib/IO.cpp"
-        "../TVM/Source/TVM.cpp"
-            "../libs/googletest/googletest/src/gtest_main.cc"
+            "../Libs/googletest/googletest/src/gtest_main.cc"
+        "../Toot/compiler/Compiler.cpp"
+        "../Toot/compiler/Lexer.cpp"
+        "../Toot/compiler/Parser.cpp"
+        "../Toot/compiler/PreProcess.cpp"
+        "../Toot/system/File.cpp"
+          "../Toot/tvm/Lib/CPPBinding.cpp"
+          "../Toot/tvm/Lib/IO.cpp"
+        "../Toot/tvm/TVM.cpp"
     "Compiler/test_lexer.cpp"
     "Compiler/test_parser.cpp"
     "TVM/test_vm.cpp"
@@ -17,15 +18,14 @@ if(CMAKE_BUILD_TYPE STREQUAL Release)
   )
   set_target_properties("Tests" PROPERTIES
     OUTPUT_NAME "Tests"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Release"
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release
   )
 endif()
 target_include_directories("Tests" PRIVATE
-  $<$<CONFIG:Release>:/Users/stefan/Developer/Steve987321/Toot/libs/googletest/googletest/include>
-  $<$<CONFIG:Release>:/Users/stefan/Developer/Steve987321/Toot/Compiler/Source>
-  $<$<CONFIG:Release>:/Users/stefan/Developer/Steve987321/Toot/TVM/Source>
+  $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest/include>
+  $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/../Toot>
 )
 target_compile_definitions("Tests" PRIVATE
 )
@@ -37,11 +37,11 @@ target_link_libraries("Tests"
 target_compile_options("Tests" PRIVATE
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:C>>:-O2>
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-O2>
-  $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-std=c++20>
+  $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-std=c++23>
 )
 if(CMAKE_BUILD_TYPE STREQUAL Release)
   set_target_properties("Tests" PROPERTIES
-    CXX_STANDARD 20
+    CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
     POSITION_INDEPENDENT_CODE False
@@ -54,15 +54,14 @@ if(CMAKE_BUILD_TYPE STREQUAL Debug)
   )
   set_target_properties("Tests" PROPERTIES
     OUTPUT_NAME "Tests"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debug"
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug
   )
 endif()
 target_include_directories("Tests" PRIVATE
-  $<$<CONFIG:Debug>:/Users/stefan/Developer/Steve987321/Toot/libs/googletest/googletest/include>
-  $<$<CONFIG:Debug>:/Users/stefan/Developer/Steve987321/Toot/Compiler/Source>
-  $<$<CONFIG:Debug>:/Users/stefan/Developer/Steve987321/Toot/TVM/Source>
+  $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest/include>
+  $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/../Toot>
 )
 target_compile_definitions("Tests" PRIVATE
 )
@@ -76,11 +75,11 @@ target_compile_options("Tests" PRIVATE
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:-g>
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-O0>
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-g>
-  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-std=c++20>
+  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-std=c++23>
 )
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set_target_properties("Tests" PROPERTIES
-    CXX_STANDARD 20
+    CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
     POSITION_INDEPENDENT_CODE False

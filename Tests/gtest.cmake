@@ -45,14 +45,14 @@
 if(CMAKE_BUILD_TYPE STREQUAL Release)
   set_target_properties("gtest" PROPERTIES
     OUTPUT_NAME "gtest"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Releasegtest"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Releasegtest"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Releasegtest"
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release/gtest
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release/gtest
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Release/gtest
   )
 endif()
 target_include_directories("gtest" PRIVATE
-  $<$<CONFIG:Release>:/Users/stefan/Developer/Steve987321/Toot/Libs/googletest/googletest>
-  $<$<CONFIG:Release>:/Users/stefan/Developer/Steve987321/Toot/Libs/googletest/googletest/include>
+  $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest>
+  $<$<CONFIG:Release>:${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest/include>
 )
 target_compile_definitions("gtest" PRIVATE
 )
@@ -63,11 +63,11 @@ target_link_libraries("gtest"
 target_compile_options("gtest" PRIVATE
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:C>>:-O2>
   $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-O2>
-  $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-std=c++20>
+  $<$<AND:$<CONFIG:Release>,$<COMPILE_LANGUAGE:CXX>>:-std=c++23>
 )
 if(CMAKE_BUILD_TYPE STREQUAL Release)
   set_target_properties("gtest" PROPERTIES
-    CXX_STANDARD 20
+    CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
     POSITION_INDEPENDENT_CODE False
@@ -77,14 +77,14 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set_target_properties("gtest" PROPERTIES
     OUTPUT_NAME "gtest"
-    ARCHIVE_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debuggtest"
-    LIBRARY_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debuggtest"
-    RUNTIME_OUTPUT_DIRECTORY "/Users/stefan/Developer/Steve987321/Toot/Tests/bin/Debuggtest"
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug/gtest
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug/gtest
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin/Debug/gtest
   )
 endif()
 target_include_directories("gtest" PRIVATE
-  $<$<CONFIG:Debug>:/Users/stefan/Developer/Steve987321/Toot/Libs/googletest/googletest>
-  $<$<CONFIG:Debug>:/Users/stefan/Developer/Steve987321/Toot/Libs/googletest/googletest/include>
+  $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest>
+  $<$<CONFIG:Debug>:${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest/include>
 )
 target_compile_definitions("gtest" PRIVATE
 )
@@ -97,11 +97,11 @@ target_compile_options("gtest" PRIVATE
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:-g>
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-O0>
   $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-g>
-  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-std=c++20>
+  $<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:CXX>>:-std=c++23>
 )
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
   set_target_properties("gtest" PROPERTIES
-    CXX_STANDARD 20
+    CXX_STANDARD 23
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
     POSITION_INDEPENDENT_CODE False
