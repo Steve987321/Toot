@@ -2,7 +2,7 @@ project "Toot"
 
     kind "StaticLib"	
 
-    targetdir ("%{wks.location}/bin" .. output_dir .. "/")
+    targetdir ("%{wks.location}/bin/" .. output_dir .. "/")
     objdir ("%{wks.location}/bin-intermediate/" .. output_dir .. "/")
 
     files 
